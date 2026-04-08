@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUKN | THE VAULT</title>
+    <style>
+        /* تصميم "ركن" - Mobile-First & Blue LED Vibe */
+        :root {
+            --bg-color: #050505; /* أسود فحم */
+            --led-blue: #007bff; /* أزرق نيون للـ Active Elements */
+            --led-red: #ff3333;  /* أحمر نيون للخطأ */
+            --text-white: #f5f5f5;
+            --border-color: #222;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* حاوية الخزنة الرئيسية */
+        .vault-container {
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid var(--border-color);
+            padding: 40px 25px;
+            border-radius: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+            position: relative;
+            transition: 0.5s;
+        }
+
+        /* تأثير الـ LED الجانبي */
+        .vault-container::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            background: linear-gradient(45deg, transparent, var(--led-blue), transparent);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .logo {
+            font-size: 2.8rem;
+            letter-spacing: 10px;
+            margin-bottom: 5px;
+            color: var(--text-white);
+            text-shadow: 0 0 15px var(--led-blue);
+            font-weight: bold;
+        }
+
+        .tagline {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* رسالة التحميل */
+        #status-message {
+            color: var(--led-blue);
+            font-style: italic;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* قسم الفزورة المخفي */
+        #riddle-section {
+            display: none; /* مخفي في البداية */
+            animation: fadeIn 1s ease-in;
+        }
+
+        .riddle-text {
+            color: #aaa;
+            font-style: italic;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* الـ Input الخاص بحل الفزورة */
+        .riddle-input {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            border: 1px solid var(--border-color);
+            color: var(--text-white);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .riddle-input:focus {
+            border-color: var(--led-blue);
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+        }
+
+        /* زر التأكيد */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background-color: transparent;
+            color: var(--led-blue);
+            border: 1px solid var(--led-blue);
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.4s;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--led-blue);
+            color: white;
+            box-shadow: 0 0 20px var(--led-blue);
+        }
+
+        /* رسائل الخطأ/النجاح النهائى */
+        .final-message {
+            display: none;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .final-message.error { color: var(--led-red); text-shadow: 0 0 10px var(--led-red); }
+        .final-message.success { color: var(--led-blue); text-shadow: 0 0 10px var(--led-blue); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+    <div class="vault-container">
+        <div class="logo">RUKN</div>
+        <div class="tagline">ORDER AUTHENTICATION</div>
+
+        <div id="status-message">جاري التحقق من الكود...</div>
+
+        <div id="riddle-section">
+            <p class="riddle-text" id="riddle-display"></p>
+            <input type="text" class="riddle-input" id="riddle-answer" placeholder="اكتب حل اللغز هنا">
+            <button class="btn-submit" onclick="verifyAnswer()">تأكيد الحل</button>
+        </div>
+
+        <div id="error-message" class="final-message error">
+            <h2>دخول غير مصرح!</h2>
+            <p>هذا الكارت تم استخدامه مسبقاً، أو الرابط غير صالح.</p>
+        </div>
+
+        <div id="success-message" class="final-message success">
+            <h2>تم فك الشفرة!</h2>
+            <p>RUKN-PROMO-20</p>
+            <p style="font-size: 0.8rem; color: #666;">كود الخصم الخاص بك.</p>
+        </div>
+    </div>
+
+    <script>
+        // داتا بيز تجريبية (هنربطها بعدين بالشيت الخارجي)
+        // الحالة 'Active' تعني متاح، 'Used' تعني تم قفله
+        let db = [
+            { id: "abc123", status: "Active", riddle: "حاجة سودة بتمشي في الساحل وليها 4 عيون؟", answer: "السيارة" },
+            { id: "xyz789", status: "Active", riddle: "ما هو اللون الذي يضيء طبلون الوحش الألماني؟", answer: "الازرق" }
+        ];
+
+        let currentCard = null;
+
+        // الدالة الأساسية اللي بتشتغل أول ما الصفحة تحمل
+        window.onload = function() {
+            // التقاط الـ ID من الرابط (e.g., vault.html?id=abc123)
+            const urlParams = new URLSearchParams(window.location.search);
+            const cardId = urlParams.get('id');
+
+            // محاكاة الاتصال بالداتا بيز (fetch)
+            setTimeout(() => {
+                checkCard(cardId);
+            }, 2000); // تأخير 2 ثانية عشان نحس بالغموض ;)
+        };
+
+        function checkCard(id) {
+            currentCard = db.find(c => c.id === id);
+
+            // إخفاء رسالة التحميل
+            document.getElementById('status-message').style.display = 'none';
+
+            if (currentCard && currentCard.status === "Active") {
+                // الكود سليم ومتاح -> اظهر الفزورة
+                showRiddle();
+                
+                // **قفل الكود** فوراً في الداتا بيز عشان محدش يستخدمه تاني
+                currentCard.status = "Used";
+                console.log("الكود اتنيل واتقفل خلاص."); 
+            } else {
+                // الكود مستخدم أو مش موجود -> اظهر رسالة الخطأ
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('main-card').style.borderColor = 'var(--led-red)';
+            }
+        }
+
+        function showRiddle() {
+            document.getElementById('riddle-section').style.display = 'block';
+            document.getElementById('riddle-display').innerText = currentCard.riddle;
+        }
+
+        function verifyAnswer() {
+            const answerIn = document.getElementById('riddle-answer').value;
+
+            if (answerIn === currentCard.answer) {
+                // حل الفزورة صح -> اظهر كود الخصم
+                document.getElementById('riddle-section').style.display = 'none';
+                document.getElementById('success-message').style.display = 'block';
+            } else {
+                alert("للأسف.. الإجابة خاطئة. حاول مرة أخرى بتركيز.");
+            }
+        }
+    </script>
+</body>
+</html>
