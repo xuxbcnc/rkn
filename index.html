@@ -89,6 +89,7 @@
             border-radius: 8px;
             text-align: center;
             outline: none;
+            font-size: 1rem;
         }
 
         .btn-submit {
@@ -124,27 +125,28 @@
         <div class="logo">RUKN</div>
         <div class="tagline">ORDER AUTHENTICATION</div>
 
-        <div id="status-message">جاري التحقق من التشفير...</div>
+        <div id="status-message">جاري الاتصال بقاعدة البيانات...</div>
 
         <div id="riddle-section">
             <p class="riddle-text" id="riddle-display"></p>
             <input type="text" class="riddle-input" id="riddle-answer" placeholder="اكتب الحل هنا">
-            <button class="btn-submit" onclick="verifyAnswer()">فك القفل</button>
+            <button class="btn-submit" onclick="verifyAnswer()">تحقق من الهوية</button>
         </div>
 
         <div id="error-message" class="final-message error">
-            <h2>دخول مرفوض</h2>
-            <p>الكود مستخدم مسبقاً أو غير موجود في النظام.</p>
+            <h2>دخول مرفوض!</h2>
+            <p>هذا الكود غير موجود أو تم استخدامه مسبقاً.</p>
         </div>
 
         <div id="success-message" class="final-message success">
-            <h2>تم الاختراق بنجاح</h2>
+            <h2>تم فك التشفير</h2>
             <p>كود الخصم: <span style="border: 1px dashed var(--led-blue); padding: 5px;">RUKN-PROMO-20</span></p>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://sheetdb.io/api/v1/e1vsn0ila9lsc";
+        // الرابط الجديد الخاص بك
+        const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
         let currentCard = null;
 
         window.onload = function() {
@@ -154,17 +156,19 @@
             if (cardId) {
                 checkCard(cardId);
             } else {
-                document.getElementById('status-message').innerText = "برجاء مسح كارت الـ QR الأصلي.";
+                document.getElementById('status-message').innerText = "خطأ: برجاء استخدام كارت QR صالح.";
             }
         };
 
         async function checkCard(id) {
             try {
+                // البحث في الشيت عن الـ id
                 const response = await fetch(`${API_URL}/search?id=${id}`);
                 const data = await response.json();
 
                 document.getElementById('status-message').style.display = 'none';
 
+                // التأكد إن الكود موجود وحالته Active
                 if (data.length > 0 && data[0].status === "Active") {
                     currentCard = data[0];
                     document.getElementById('riddle-section').style.display = 'block';
@@ -173,24 +177,27 @@
                     document.getElementById('error-message').style.display = 'block';
                 }
             } catch (e) {
-                document.getElementById('status-message').innerText = "خطأ في الاتصال بالنظام.";
+                document.getElementById('status-message').innerText = "خطأ في الشبكة.";
             }
         }
 
         async function verifyAnswer() {
             const answerIn = document.getElementById('riddle-answer').value;
-            if (answerIn === currentCard.answer) {
-                // تحديث الحالة لـ Used في الشيت
+            
+            // مقارنة الإجابة (تجاهل المسافات وحالة الأحرف)
+            if (answerIn.trim().toLowerCase() === currentCard.answer.trim().toLowerCase()) {
+                
+                // تحديث الحالة في الشيت لـ Used
                 await fetch(`${API_URL}/id/${currentCard.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ "data": { "status": "Used" } })
                 });
-                
+
                 document.getElementById('riddle-section').style.display = 'none';
                 document.getElementById('success-message').style.display = 'block';
             } else {
-                alert("إجابة خاطئة.. ركز يا بطل!");
+                alert("الإجابة خاطئة، حاول مرة أخرى.");
             }
         }
     </script>
