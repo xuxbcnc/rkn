@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: #0a0a0a; /* أسود مطفي */
+            background-color: #0a0a0a;
             margin: 0;
             display: flex;
             justify-content: center;
@@ -34,7 +34,7 @@
         .riddle-box {
             background: #1a1a1a;
             padding: 20px;
-            border-right: 4px solid #edff00; /* لمسة ركن الفسفورية */
+            border-right: 4px solid #edff00;
             margin-bottom: 25px;
             font-size: 1.1rem;
             line-height: 1.6;
@@ -71,22 +71,17 @@
         button:hover { background: #edff00; transform: translateY(-2px); }
 
         .hidden { display: none; }
-        
-        #success-msg h2 { color: #edff00; }
-        .success-icon { font-size: 60px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container" id="main-card">
-        <div id="loading" class="hidden">جاري التحقق...</div>
+        <div id="loading">جاري التحقق من الكود...</div>
         
-        <div id="content">
+        <div id="content" class="hidden">
             <h1>ركن</h1>
             <p>DECODE TO UNLOCK</p>
-            
             <div class="riddle-box" id="riddle-text"></div>
-
             <input type="text" id="user-answer" placeholder="اكتب الحل هنا">
             <button onclick="checkAnswer()">فك التشفير</button>
         </div>
@@ -96,11 +91,7 @@
             <p>الكود ده مش شغال أو استُخدم قبل كدة.</p>
         </div>
 
-        <div id="success-msg" class="hidden">
-            <div class="success-icon">✔️</div>
-            <h2>MISSION ACCOMPLISHED</h2>
-            <p>مبروك! حلّيت اللغز. خد سكرين شوت وكلمنا.</p>
-        </div>
+        <div id="success-msg" class="hidden"></div>
     </div>
 
     <script src="script.js"></script>
