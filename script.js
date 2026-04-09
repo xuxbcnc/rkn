@@ -1,14 +1,14 @@
-// --- الإعدادات ---
-const SCRIPT_URL = "حط_رابط_الـ_WEB_APP_هنا"; 
-const WHATSAPP_NUMBER = "2010XXXXXXXX"; // رقم واتساب ركن
-const INSTA_USERNAME = "rkn_brand";    // يوزر إنستجرام ركن
-const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs"; // لسه بنحتاجه عشان "نقرأ" الفزورة في الأول
+// --- إعدادات براند ركن النهائية ---
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCMtHfck7TC6vI8jACqjAgR4q6c_pZ9Z5nUXZFI_FE4OoMXyX9C026yn2xqUL_tBXzbw/exec"; 
+const WHATSAPP_NUMBER = "2010XXXXXXXX"; // حط رقم واتساب ركن هنا
+const INSTA_USERNAME = "rkn_brand";    // حط يوزر إنستجرام ركن هنا
+const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs"; // بنحتاجه لقراءة الفزورة فقط
 
 const urlParams = new URLSearchParams(window.location.search);
 const codeId = urlParams.get('id');
 let correctAnswer = "";
 
-// 1. تنظيف النص
+// 1. تنظيف النص لضمان دقة التحقق
 function cleanText(text) {
     if (!text) return "";
     return text.toString().trim()
@@ -16,7 +16,7 @@ function cleanText(text) {
         .replace(/[أإآ]/g, "ا").replace(/\s+/g, "");
 }
 
-// 2. جلب الفزورة (عن طريق SheetDB كالعادة)
+// 2. جلب بيانات الفزورة عند فتح الصفحة
 async function init() {
     if (!codeId) { showError(); return; }
     try {
@@ -31,24 +31,25 @@ async function init() {
     } catch (error) { showError(); }
 }
 
-// 3. التحقق من الحل
+// 3. التحقق من حل الزبون
 function checkAnswer() {
     const userAnswer = document.getElementById('user-answer').value;
     if (cleanText(userAnswer) === cleanText(correctAnswer)) {
         markAsUsed();
     } else {
-        alert("فكر تاني يا بطل.. الحل غلط!");
+        alert("الإجابة غلط، حاول تاني!");
     }
 }
 
-// 4. التحديث عبر الـ Google Apps Script
+// 4. التحديث عبر الـ Google Apps Script (الرابط الجديد)
 async function markAsUsed() {
     try {
+        // أ- توليد القيم العشوائية
         const discounts = ["10%", "20%"];
         const randomDiscount = discounts[Math.floor(Math.random() * discounts.length)];
         const secretQR = "RKN-" + Math.floor(100000 + Math.random() * 900000);
 
-        // إرسال البيانات للسكريبت المطور
+        // ب- إرسال البيانات للسكريبت المطور
         fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors', 
@@ -61,12 +62,12 @@ async function markAsUsed() {
             })
         });
 
-        // إظهار واجهة النجاح فوراً للزبون
+        // ج- إظهار واجهة النجاح فوراً
         showSuccessUI(randomDiscount, secretQR);
 
     } catch (error) {
-        console.error(error);
-        alert("إجابتك صح! لكن حدث خطأ في الربط، صور الشاشة وكلمنا.");
+        console.error("Connection Error:", error);
+        alert("إجابتك صح! لكن حصل مشكلة في الربط، صور الشاشة وكلمنا.");
     }
 }
 
