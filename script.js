@@ -1,69 +1,66 @@
 const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
-const WHATSAPP_NUMBER = "2010XXXXXXXX"; // حط رقمك هنا
+const WHATSAPP_NUMBER = "2010XXXXXXXX"; // حط رقمك
 
 const urlParams = new URLSearchParams(window.location.search);
 const codeId = urlParams.get('id');
 let correctAnswer = "";
 
-// دالة تنظيف النص لضمان قبول الإجابة صح
 const clean = (t) => t ? t.toString().trim().replace(/^ال/, "").replace(/[ة]/g, "ه").replace(/[أإآ]/g, "ا").replace(/\s+/g, "") : "";
 
-async function init() {
-    if (!codeId) {
-        document.getElementById('loading').innerText = "CODE MISSING";
-        return;
-    }
+// دالة توليد كود خصم عشوائي
+function generateDiscountCode() {
+    return "DISC-" + Math.floor(1000 + Math.random() * 9000);
+}
 
+async function init() {
+    if (!codeId) return;
     try {
         const response = await fetch(`${API_URL}/search?id=${codeId}`);
         const data = await response.json();
-        
         if (data && data.length > 0 && data[0].status === "Active") {
             correctAnswer = data[0].answer;
             document.getElementById('riddle-text').innerText = data[0].riddle;
-            
-            // إخفاء التحميل وإظهار المحتوى
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('content').classList.remove('hidden');
         } else {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('error-msg').classList.remove('hidden');
+            document.getElementById('loading').innerText = "الكود مستخدم أو غير صحيح";
         }
-    } catch (e) {
-        document.getElementById('loading').innerText = "ERROR";
-    }
+    } catch (e) { console.error(e); }
 }
 
 async function markAsUsed() {
+    const dCode = generateDiscountCode(); // توليد الكود هنا
     try {
-        // تحديث الـ Status فقط
+        // تحديث الحالة وإرسال كود الخصم الجديد للشيت
         await fetch(`${API_URL}/id/${codeId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ "status": "Used" })
+            body: JSON.stringify({ 
+                "status": "Used",
+                "discount_code": dCode 
+            })
         });
 
-        // إظهار واجهة النجاح
-        document.getElementById('content').classList.add('hidden');
-        document.getElementById('success-msg').classList.remove('hidden');
-        
-        // رسالة الواتساب البسيطة
-        const waMsg = encodeURIComponent(`أنا حليت فزورة القطعة رقم #${codeId}`);
-        
-        document.getElementById('success-msg').innerHTML = `
-            <h1>SUCCESS</h1>
+        const successDiv = document.getElementById('success-msg');
+        const waMsg = encodeURIComponent(`أنا حليت فزورة القطعة #${codeId} وكود الخصم بتاعي هو: ${dCode}`);
+
+        successDiv.innerHTML = `
+            <h1 style="color: #edff00;">SUCCESS</h1>
             <div class="serial-tag">
-                <p style="color: #444; margin: 0; font-size: 0.6rem; letter-spacing: 2px;">SERIAL ID</p>
-                <h3 style="color: #fff; margin: 5px 0;">#${codeId}</h3>
+                <p style="color: #444; margin: 0; font-size: 0.6rem; letter-spacing: 2px;">DISCOUNT CODE</p>
+                <h3 style="color: #fff; margin: 5px 0; font-size: 1.5rem;">${dCode}</h3>
             </div>
-            <p>خد سكرين شوت وابعتها هنا:</p>
+            <p style="font-size: 0.8rem; margin-bottom: 15px;">صور الشاشة دي وابعتها واتساب</p>
             <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}" target="_blank" class="btn-contact">
-                <i class="fab fa-whatsapp"></i> WhatsApp
+                <i class="fab fa-whatsapp"></i> تفعيل الخصم
             </a>
         `;
 
+        document.getElementById('content').classList.add('hidden');
+        successDiv.classList.remove('hidden');
+
     } catch (error) {
-        alert("إجابتك صح! صور الشاشة وكلمنا.");
+        alert("إجابتك صح! صور الشاشة وكلمنا يدوي.");
     }
 }
 
