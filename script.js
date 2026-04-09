@@ -1,64 +1,82 @@
 const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
-const WHATSAPP_NUMBER = "2010XXXXXXXX"; // حط رقمك
+const WHATSAPP_NUMBER = "2010XXXXXXXX"; // حط رقمك هنا
 
 const urlParams = new URLSearchParams(window.location.search);
 const codeId = urlParams.get('id');
 let correctAnswer = "";
 
+// دالة لتنظيف النص
+const clean = (t) => t ? t.toString().trim().replace(/^ال/, "").replace(/[ة]/g, "ه").replace(/[أإآ]/g, "ا").replace(/\s+/g, "") : "";
+
 async function init() {
-    if (!codeId) return;
+    // لو مفيش ID في الرابط، اظهر رسالة خطأ
+    if (!codeId) {
+        alert("كود القطعة ناقص!");
+        return;
+    }
+
     try {
+        console.log("Fetching data for ID:", codeId);
         const response = await fetch(`${API_URL}/search?id=${codeId}`);
         const data = await response.json();
         
-        if (data.length > 0 && data[0].status === "Active") {
-            // شيلنا الـ Loading وظهرنا المحتوى
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').classList.remove('hidden');
-            document.getElementById('riddle-text').innerText = data[0].riddle;
+        if (data && data.length > 0 && data[0].status === "Active") {
+            // حفظ الإجابة الصحيحة
             correctAnswer = data[0].answer;
+            
+            // عرض فزورة القطعة
+            const riddleElement = document.getElementById('riddle-text');
+            if(riddleElement) riddleElement.innerText = data[0].riddle;
+
+            // أهم خطوة: إخفاء الـ Loading وإظهار المحتوى مهما كان التنسيق
+            if(document.getElementById('loading')) document.getElementById('loading').style.display = 'none';
+            if(document.getElementById('content')) document.getElementById('content').classList.remove('hidden');
+            
         } else {
-            alert("الكود ده مش فعال أو مستخدم قبل كدة");
+            alert("القطعة دي مش موجودة أو تم استخدامها قبل كدة.");
         }
     } catch (e) {
-        console.error("Error fetching data:", e);
+        console.error("Fetch error:", e);
+        alert("مشكلة في الاتصال بالسيرفر، جرب تاني.");
     }
 }
 
 async function markAsUsed() {
     try {
-        // 1. تحديث الـ Status في الشيت (العمود B)
+        // تحديث الشيت
         await fetch(`${API_URL}/id/${codeId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ "status": "Used" })
         });
 
-        // 2. إظهار واجهة النجاح بتاعتك (success-msg)
-        document.getElementById('content').classList.add('hidden');
-        document.getElementById('success-msg').classList.remove('hidden');
+        // إخفاء الفزورة وإظهار النجاح
+        if(document.getElementById('content')) document.getElementById('content').classList.add('hidden');
+        if(document.getElementById('success-msg')) document.getElementById('success-msg').classList.remove('hidden');
 
-        // 3. تحديث رسالة الواتساب جوه التصميم بتاعك
-        const whatsappBtn = document.querySelector('#success-msg a');
+        // تحديث رابط الواتساب لو موجود
+        const whatsappBtn = document.querySelector('a[href*="wa.me"]');
         if (whatsappBtn) {
-            const message = `أنا فكيت تشفير القطعة رقم #${codeId}.. إيه الخصم بتاعي؟`;
-            whatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            const msg = `أنا حليت فزورة القطعة رقم #${codeId}`;
+            whatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
         }
 
     } catch (e) {
-        alert("حصل مشكلة في التحديث، بس إجابتك صح! صور الشاشة وكلمنا.");
+        console.error("Update error:", e);
+        alert("إجابتك صح! بس فيه مشكلة في التحديث، صور الشاشة وكلمنا.");
     }
 }
 
 function checkAnswer() {
-    const userAnswer = document.getElementById('user-answer').value;
-    const clean = (t) => t.trim().replace(/^ال/, "").replace(/[ة]/g, "ه").replace(/[أإآ]/g, "ا").replace(/\s+/g, "");
-    
-    if (clean(userAnswer) === clean(correctAnswer)) {
+    const userInput = document.getElementById('user-answer');
+    if (!userInput) return;
+
+    if (clean(userInput.value) === clean(correctAnswer)) {
         markAsUsed();
     } else {
-        alert("الإجابة غلط يا بطل، حاول تاني!");
+        alert("الإجابة غلط، حاول تاني!");
     }
 }
 
-init();
+// تشغيل الدالة فور تحميل الصفحة
+window.onload = init;
