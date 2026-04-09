@@ -1,72 +1,55 @@
-// --- إعدادات براند ركن النهائية ---
+// --- إعدادات براند ركن ---
 const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
-const WHATSAPP_NUMBER = "2010XXXXXXXX"; // حط رقمك هنا
-const INSTA_USERNAME = "rkn_brand";   // حط يوزرك هنا
+const WHATSAPP_NUMBER = "2010XXXXXXXX"; // غير الرقم لرقمك الحقيقي
+const INSTA_USERNAME = "rkn_brand";   // غير اليوزر ليوزرك الحقيقي
 
-// جلب الـ ID من الرابط
 const urlParams = new URLSearchParams(window.location.search);
 const codeId = urlParams.get('id');
 let correctAnswer = "";
 
-// 1. تنظيف النصوص للتحقق الذكي
+// 1. تنظيف النص لضمان دقة التحقق
 function cleanText(text) {
     if (!text) return "";
     return text.toString().trim()
-        .replace(/^ال/, "")
-        .replace(/[ة]/g, "ه")
-        .replace(/[أإآ]/g, "ا")
-        .replace(/\s+/g, "");
+        .replace(/^ال/, "").replace(/[ة]/g, "ه")
+        .replace(/[أإآ]/g, "ا").replace(/\s+/g, "");
 }
 
-// 2. تشغيل النظام وجلب البيانات
+// 2. جلب بيانات الفزورة عند فتح الصفحة
 async function init() {
-    if (!codeId) {
-        showError();
-        return;
-    }
-
+    if (!codeId) { showError(); return; }
     try {
         const response = await fetch(`${API_URL}/search?id=${codeId}`);
         const data = await response.json();
-
         if (data.length > 0 && data[0].status === "Active") {
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('content').classList.remove('hidden');
             document.getElementById('riddle-text').innerText = data[0].riddle;
             correctAnswer = data[0].answer;
-        } else {
-            showError();
-        }
-    } catch (error) {
-        console.error("Connection Error:", error);
-        showError();
-    }
+        } else { showError(); }
+    } catch (error) { showError(); }
 }
 
-// 3. التحقق من الإجابة
+// 3. التحقق من حل الزبون
 function checkAnswer() {
     const userAnswer = document.getElementById('user-answer').value;
-    
     if (cleanText(userAnswer) === cleanText(correctAnswer)) {
         markAsUsed();
     } else {
-        alert("الإجابة غير صحيحة، حاول مرة أخرى.");
+        alert("الإجابة غلط، حاول تاني!");
     }
 }
 
-// 4. تحديث الشيت وإظهار شاشة النجاح (النظام المطور)
+// 4. الوظيفة الأساسية: تحديث الشيت وإظهار النجاح
 async function markAsUsed() {
     try {
-        // أ- اختيار الخصم عشوائياً
+        // أ- توليد القيم العشوائية
         const discounts = ["10%", "20%"];
         const randomDiscount = discounts[Math.floor(Math.random() * discounts.length)];
-
-        // ب- توليد كود سري للـ QR (رقم عشوائي مميز للقطعة دي)
         const secretQR = "RKN-" + Math.floor(100000 + Math.random() * 900000);
 
-        // ج- تحديث الشيت بكل التفاصيل الجديدة
-        // تأكد أن الشيت يحتوي على أعمدة: status, discount_value, qr_code_secret
-        await fetch(`${API_URL}/id/${codeId}`, {
+        // ب- إرسال البيانات الثلاثة للشيت (Status + Value + Secret)
+        const updateResponse = await fetch(`${API_URL}/id/${codeId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -76,12 +59,14 @@ async function markAsUsed() {
             })
         });
 
-        // د- تجهيز الرسائل والروابط
+        if (!updateResponse.ok) throw new Error("Update failed");
+
+        // ج- تحضير الرسائل والروابط
         const message = `أنا فكيت تشفير القطعة رقم #${codeId} وكسبت خصم ${randomDiscount}! كود الخصم: ${secretQR}`;
         const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
         const instaUrl = `https://www.instagram.com/direct/t/${INSTA_USERNAME}`;
 
-        // هـ- تحديث واجهة المستخدم
+        // د- عرض واجهة النجاح
         document.getElementById('content').classList.add('hidden');
         const successMsg = document.getElementById('success-msg');
         successMsg.classList.remove('hidden');
@@ -110,17 +95,15 @@ async function markAsUsed() {
         `;
 
     } catch (error) {
-        console.error("Error updating sheet:", error);
-        alert("إجابتك صحيحة! ولكن حدث خطأ في النظام. من فضلك خد سكرين شوت وكلمنا.");
+        console.error(error);
+        alert("حدثت مشكلة في الاتصال، صور الشاشة وكلمنا فوراً.");
     }
 }
 
-// 5. إظهار رسالة الخطأ
 function showError() {
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('content').classList.add('hidden');
     document.getElementById('error-msg').classList.remove('hidden');
 }
 
-// تشغيل عند التحميل
 init();
