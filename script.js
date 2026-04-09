@@ -1,6 +1,6 @@
 const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
-const WHATSAPP_NUMBER = "2010XXXXXXXX"; // حط رقمك
-const INSTA_USERNAME = "rkn_brand";   // حط يوزرك
+const WHATSAPP_NUMBER = "2010XXXXXXXX"; // رقمك هنا
+const INSTA_USERNAME = "rkn_brand";   // يوزرك هنا
 
 const urlParams = new URLSearchParams(window.location.search);
 const codeId = urlParams.get('id');
@@ -33,7 +33,7 @@ function checkAnswer() {
 
 async function markAsUsed() {
     try {
-        // تحديث الـ status فقط لـ Used كما كان في السابق
+        // تحديث الـ status فقط لـ Used
         await fetch(`${API_URL}/id/${codeId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -55,7 +55,7 @@ async function markAsUsed() {
             <h2 style="margin-bottom: 5px; letter-spacing: 2px;">SUCCESS</h2>
             <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">YOU GOT ${randomDiscount} OFF</p>
             
-            <div class="serial-tag">
+            <div class="serial-tag" style="background: #000; padding: 12px; border-radius: 8px; border: 1px solid #1a1a1a; margin-bottom: 20px;">
                 <p style="color: #444; margin: 0; font-size: 0.6rem; letter-spacing: 2px;">ID / SERIAL</p>
                 <h3 style="color: #fff; margin: 5px 0; font-size: 1.4rem;">#${codeId}</h3>
             </div>
@@ -71,7 +71,7 @@ async function markAsUsed() {
             </a>
         `;
     } catch (error) { 
-        alert("حصل مشكلة، بس إجابتك صح! صور الشاشة وكلمنا."); 
+        alert("إجابتك صحيحة! صور الشاشة وكلمنا."); 
     }
 }
 
