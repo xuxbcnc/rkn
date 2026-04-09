@@ -1,6 +1,6 @@
 const API_URL = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
-const WHATSAPP_NUMBER = "2010XXXXXXXX"; // رقمك
-const INSTA_USERNAME = "rkn_brand";   // يوزرك
+const WHATSAPP_NUMBER = "2010XXXXXXXX"; // ضع رقمك هنا
+const INSTA_USERNAME = "rkn_brand";   // ضع يوزر إنستجرام هنا
 
 const urlParams = new URLSearchParams(window.location.search);
 const codeId = urlParams.get('id');
@@ -59,12 +59,14 @@ async function markAsUsed() {
                 <h3 style="color: #fff; margin: 5px 0; font-size: 1.4rem;">#${codeId}</h3>
             </div>
 
+            <p style="color: #edff00; font-size: 0.85rem; margin-bottom: 15px; font-weight: bold;">خد سكرين شوت وابعتها هنا:</p>
+
             <a href="${whatsappUrl}" target="_blank" class="btn-contact">
-                <i class="fab fa-whatsapp"></i> CLAIM VIA WHATSAPP
+                <i class="fab fa-whatsapp"></i> WhatsApp
             </a>
 
             <a href="${instaUrl}" target="_blank" class="btn-contact">
-                <i class="fab fa-instagram"></i> CLAIM VIA INSTAGRAM
+                <i class="fab fa-instagram"></i> Instagram
             </a>
         `;
     } catch (error) { alert("Done! Take a screenshot."); }
