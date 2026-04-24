@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             // سحب ملف الأسرار
-            const r_cfg = await fetch('config_v12.json');
+            const r_cfg = await fetch('Config_v12.json');
             if (!r_cfg.ok) throw new Error("Missing Config");
             _cfg = await r_cfg.json();
 
