@@ -1,1 +1,88 @@
-function _0x1ea8(_0x3cb631,_0x244590){const _0x359b88=_0x13c8();return _0x1ea8=function(_0x5483b9,_0x2b8b13){_0x5483b9=_0x5483b9-0x132;let _0x614497=_0x359b88[_0x5483b9];return _0x614497;},_0x1ea8(_0x3cb631,_0x244590);}function _0x13c8(){const _0x184f56=['innerHTML','28834490ABRmql','click','add','log','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h1>SUCCESS</h1>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22serial-tag\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20style=\x22color:\x20#444;\x20margin:\x200;\x20font-size:\x200.6rem;\x20letter-spacing:\x202px;\x22>SERIAL\x20ID</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h3\x20style=\x22color:\x20#fff;\x20margin:\x205px\x200;\x22>#','status','error','getElementById','console','397582DCZnWS','submit-btn','loading','2kICxPz','\x22\x20target=\x22_blank\x22\x20class=\x22btn-contact\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<i\x20class=\x22fab\x20fa-whatsapp\x22></i>\x20WhatsApp\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</a>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','classList','innerText','replace','stringify','json','أنا\x20حليت\x20فزورة\x20القطعة\x20رقم\x20#','riddle-text','</h3>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>صور\x20الشاشة\x20وابعتها\x20هنا\x20عشان\x20تستلم\x20الهدية:</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<a\x20href=\x22','?text=','riddle','ERROR','value','success-msg','375vNYkZl','application/json','trace','exception','get','Active','PATCH','CODE\x20MISSING','toString','apply','42918IYUYPP','config_v12.json','content','addEventListener','warn','table','prototype','3441276akmqLM','10367448tRBynr','search','إجابتك\x20صح!\x20صور\x20الشاشة\x20وكلمنا\x20واتساب.','info','hidden','2426264cdYQiJ','9FbqZzV','https://wa.me/','remove','error-msg','الإجابة\x20غلط،\x20حاول\x20تاني!','bind','627627jbmIAJ'];_0x13c8=function(){return _0x184f56;};return _0x13c8();}(function(_0x515bbb,_0x3cf93b){const _0x527e5f=_0x1ea8,_0x21b279=_0x515bbb();while(!![]){try{const _0x2e9569=-parseInt(_0x527e5f(0x136))/0x1*(-parseInt(_0x527e5f(0x133))/0x2)+-parseInt(_0x527e5f(0x156))/0x3+-parseInt(_0x527e5f(0x15c))/0x4+-parseInt(_0x527e5f(0x145))/0x5*(-parseInt(_0x527e5f(0x14f))/0x6)+-parseInt(_0x527e5f(0x163))/0x7+-parseInt(_0x527e5f(0x157))/0x8+-parseInt(_0x527e5f(0x15d))/0x9*(-parseInt(_0x527e5f(0x165))/0xa);if(_0x2e9569===_0x3cf93b)break;else _0x21b279['push'](_0x21b279['shift']());}catch(_0x3194f4){_0x21b279['push'](_0x21b279['shift']());}}}(_0x13c8,0xa5970),(async function(){const _0x1fcdb5=_0x1ea8,_0x316d6c=(function(){let _0x447b1a=!![];return function(_0x507775,_0x54ad0e){const _0x7a86d4=_0x447b1a?function(){const _0x2e63e7=_0x1ea8;if(_0x54ad0e){const _0x745925=_0x54ad0e[_0x2e63e7(0x14e)](_0x507775,arguments);return _0x54ad0e=null,_0x745925;}}:function(){};return _0x447b1a=![],_0x7a86d4;};}());let _0x1fd445=null,_0x461e1c='';const _0x39a069=new URLSearchParams(window['location'][_0x1fcdb5(0x158)]),_0x16db47=_0x39a069[_0x1fcdb5(0x149)]('id'),_0xb96b3=_0x4ab7d1=>_0x4ab7d1?_0x4ab7d1['toString']()['trim']()[_0x1fcdb5(0x13a)](/^ال/,'')[_0x1fcdb5(0x13a)](/[ة]/g,'ه')['replace'](/[أإآ]/g,'ا')[_0x1fcdb5(0x13a)](/\s+/g,''):'';async function _0x43869a(){const _0x203dce=_0x1fcdb5,_0x31d1b2=_0x316d6c(this,function(){const _0x18f44b=_0x1ea8;let _0x28cc67;try{const _0xdc11f4=Function('return\x20(function()\x20'+'{}.constructor(\x22return\x20this\x22)(\x20)'+');');_0x28cc67=_0xdc11f4();}catch(_0x6916bc){_0x28cc67=window;}const _0x49734c=_0x28cc67[_0x18f44b(0x132)]=_0x28cc67[_0x18f44b(0x132)]||{},_0x2b520c=[_0x18f44b(0x168),_0x18f44b(0x153),_0x18f44b(0x15a),_0x18f44b(0x16b),_0x18f44b(0x148),_0x18f44b(0x154),_0x18f44b(0x147)];for(let _0xe69910=0x0;_0xe69910<_0x2b520c['length'];_0xe69910++){const _0xba8fd5=_0x316d6c['constructor'][_0x18f44b(0x155)][_0x18f44b(0x162)](_0x316d6c),_0x48a371=_0x2b520c[_0xe69910],_0x59414f=_0x49734c[_0x48a371]||_0xba8fd5;_0xba8fd5['__proto__']=_0x316d6c[_0x18f44b(0x162)](_0x316d6c),_0xba8fd5[_0x18f44b(0x14d)]=_0x59414f[_0x18f44b(0x14d)]['bind'](_0x59414f),_0x49734c[_0x48a371]=_0xba8fd5;}});_0x31d1b2();if(!_0x16db47){document['getElementById'](_0x203dce(0x135))[_0x203dce(0x139)]=_0x203dce(0x14c);return;}try{const _0x2bcecf=await fetch(_0x203dce(0x150));_0x1fd445=await _0x2bcecf[_0x203dce(0x13c)]();const _0x13a81c=await fetch(_0x1fd445['a']+'/search?id='+_0x16db47),_0x4f4bc2=await _0x13a81c[_0x203dce(0x13c)]();_0x4f4bc2&&_0x4f4bc2['length']>0x0&&_0x4f4bc2[0x0][_0x203dce(0x16a)]===_0x203dce(0x14a)?(_0x461e1c=_0x4f4bc2[0x0]['answer'],document[_0x203dce(0x16c)](_0x203dce(0x13e))[_0x203dce(0x139)]=_0x4f4bc2[0x0][_0x203dce(0x141)],document[_0x203dce(0x16c)](_0x203dce(0x135))[_0x203dce(0x138)][_0x203dce(0x167)](_0x203dce(0x15b)),document[_0x203dce(0x16c)](_0x203dce(0x151))['classList'][_0x203dce(0x15f)]('hidden')):(document[_0x203dce(0x16c)](_0x203dce(0x135))[_0x203dce(0x138)]['add'](_0x203dce(0x15b)),document['getElementById'](_0x203dce(0x160))[_0x203dce(0x138)][_0x203dce(0x15f)](_0x203dce(0x15b)));}catch(_0x579884){document[_0x203dce(0x16c)]('loading')[_0x203dce(0x139)]=_0x203dce(0x142),console[_0x203dce(0x168)]('Check\x20if\x20config_v12.json\x20exists!');}}async function _0x4a91eb(){const _0x3294d0=_0x1fcdb5;try{await fetch(_0x1fd445['a']+'/id/'+_0x16db47,{'method':_0x3294d0(0x14b),'headers':{'Content-Type':_0x3294d0(0x146)},'body':JSON[_0x3294d0(0x13b)]({'status':'Used'})}),document['getElementById'](_0x3294d0(0x151))[_0x3294d0(0x138)][_0x3294d0(0x167)](_0x3294d0(0x15b)),document['getElementById'](_0x3294d0(0x144))[_0x3294d0(0x138)][_0x3294d0(0x15f)](_0x3294d0(0x15b));const _0x20a89f=encodeURIComponent(_0x3294d0(0x13d)+_0x16db47),_0x349316=_0x3294d0(0x15e)+_0x1fd445['w']+_0x3294d0(0x140)+_0x20a89f;document[_0x3294d0(0x16c)](_0x3294d0(0x144))[_0x3294d0(0x164)]=_0x3294d0(0x169)+_0x16db47+_0x3294d0(0x13f)+_0x349316+_0x3294d0(0x137);}catch(_0x10027c){alert(_0x3294d0(0x159));}}document['getElementById'](_0x1fcdb5(0x134))[_0x1fcdb5(0x152)](_0x1fcdb5(0x166),()=>{const _0x5b7e94=_0x1fcdb5,_0x567d67=document[_0x5b7e94(0x16c)]('user-answer')[_0x5b7e94(0x143)];_0xb96b3(_0x567d67)===_0xb96b3(_0x461e1c)?_0x4a91eb():alert(_0x5b7e94(0x161));}),_0x43869a();}()));
+(async function() {
+    // متغيرات داخلية (محبوسة جوه الدالة مش هتظهر في الـ Console)
+    let _secrets = null; 
+    let _ans = "";
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeId = urlParams.get('id');
+
+    // دالة تنظيف الإجابة (عشان الحروف العربي والهمزات)
+    const clean = (t) => t ? t.toString().trim().replace(/^ال/, "").replace(/[ة]/g, "ه").replace(/[أإآ]/g, "ا").replace(/\s+/g, "") : "";
+
+    // 1. دالة البداية: بتسحب البيانات من الملف الخارجي وبتجيب الفزورة
+    async function init() {
+        if (!codeId) {
+            document.getElementById('loading').innerText = "CODE MISSING";
+            return;
+        }
+
+        try {
+            // سحب ملف الأسرار (تأكد إن الاسم ده هو نفس اسم الملف اللي هترفه)
+            const response = await fetch('config_v12.json');
+            _secrets = await response.json();
+
+            // استخدام الرابط اللي جه من الملف عشان نجيب بيانات القطعة
+            const r = await fetch(`${_secrets.a}/search?id=${codeId}`);
+            const d = await r.json();
+            
+            if (d && d.length > 0 && d[0].status === "Active") {
+                _ans = d[0].answer;
+                document.getElementById('riddle-text').innerText = d[0].riddle;
+                
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('content').classList.remove('hidden');
+            } else {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        } catch (e) {
+            document.getElementById('loading').innerText = "ERROR";
+            console.log("Check if config_v12.json exists!");
+        }
+    }
+
+    // 2. دالة النجاح: بتغير الحالة لـ Used وتفتح الواتساب
+    async function finalize() {
+        try {
+            // تحديث السيرفر
+            await fetch(`${_secrets.a}/id/${codeId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "status": "Used" })
+            });
+
+            document.getElementById('content').classList.add('hidden');
+            document.getElementById('success-msg').classList.remove('hidden');
+            
+            const msg = encodeURIComponent(`أنا حليت فزورة القطعة رقم #${codeId}`);
+            const waLink = `https://wa.me/${_secrets.w}?text=${msg}`;
+
+            document.getElementById('success-msg').innerHTML = `
+                <h1>SUCCESS</h1>
+                <div class="serial-tag">
+                    <p style="color: #444; margin: 0; font-size: 0.6rem; letter-spacing: 2px;">SERIAL ID</p>
+                    <h3 style="color: #fff; margin: 5px 0;">#${codeId}</h3>
+                </div>
+                <p>صور الشاشة وابعتها هنا عشان تستلم الهدية:</p>
+                <a href="${waLink}" target="_blank" class="btn-contact">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+            `;
+        } catch (err) {
+            alert("إجابتك صح! صور الشاشة وكلمنا واتساب.");
+        }
+    }
+
+    // 3. مراقبة زرار الإرسال
+    document.getElementById('submit-btn').addEventListener('click', () => {
+        const val = document.getElementById('user-answer').value;
+        if (clean(val) === clean(_ans)) {
+            finalize();
+        } else {
+            alert("الإجابة غلط، حاول تاني!");
+        }
+    });
+
+    // تشغيل الكود
+    init();
+})();
