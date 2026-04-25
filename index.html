@@ -8,42 +8,49 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&display=swap" rel="stylesheet"/>
 
 <style>
-body {
+body{
   margin:0;
   font-family:Cairo;
   background:#0d0d0d;
   color:#fff;
 }
 
-.container {
+.container{
   max-width:600px;
-  margin:50px auto;
+  margin:60px auto;
   padding:20px;
 }
 
-.card {
+.card{
   background:#111;
   padding:25px;
   border-radius:15px;
   border:1px solid #333;
 }
 
-h1 {
+h1{
   color:#edff00;
   font-size:22px;
 }
 
-input {
+#riddle{
+  margin:15px 0;
+  padding:10px;
+  background:#000;
+  border-radius:10px;
+  min-height:50px;
+}
+
+input{
   width:100%;
   padding:12px;
-  margin-top:15px;
   border-radius:10px;
   border:1px solid #333;
   background:#000;
   color:#fff;
 }
 
-button {
+button{
   width:100%;
   margin-top:15px;
   padding:12px;
@@ -54,7 +61,7 @@ button {
   cursor:pointer;
 }
 
-.msg {
+.msg{
   margin-top:10px;
   font-size:14px;
 }
@@ -79,50 +86,86 @@ button {
 <script>
 const API = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
 
+// =========================
+// CACHE (يحمي من الضغط)
+// =========================
 let CACHE = null;
+let LAST_FETCH = 0;
 
-// تحميل مرة واحدة فقط
-async function loadData() {
-  if (CACHE) return CACHE;
+// =========================
+// تحميل البيانات مرة واحدة فقط
+// =========================
+async function loadData(){
+  const now = Date.now();
+
+  // cache لمدة 60 ثانية
+  if (CACHE && now - LAST_FETCH < 60000){
+    return CACHE;
+  }
 
   const res = await fetch(API);
+
+  // مهم جدًا: منع كسر JSON
   const text = await res.text();
 
-  try {
-    CACHE = JSON.parse(text);
-  } catch {
-    document.getElementById("riddle").innerText = "خطأ في تحميل البيانات";
-    throw new Error("Invalid API response");
+  let json;
+  try{
+    json = JSON.parse(text);
+  }catch(e){
+    throw new Error("API returned invalid response (429 or HTML)");
   }
 
-  return CACHE;
+  if(!Array.isArray(json)){
+    throw new Error("API did not return array");
+  }
+
+  CACHE = json;
+  LAST_FETCH = now;
+
+  return json;
 }
 
-// جلب لغز واحد (id من الرابط)
-function getId() {
-  const p = new URLSearchParams(location.search);
-  return p.get("id");
+// =========================
+// جلب ID من الرابط
+// =========================
+function getId(){
+  return new URLSearchParams(location.search).get("id");
 }
 
-async function init() {
+// =========================
+// INIT
+// =========================
+async function init(){
   const id = getId();
-  if (!id) {
-    document.getElementById("riddle").innerText = "لا يوجد ID في الرابط";
+
+  if(!id){
+    document.getElementById("riddle").innerText = "❌ لا يوجد ID في الرابط";
     return;
   }
 
-  const data = await loadData();
-  const row = data.find(r => r.id === id);
+  try{
+    const data = await loadData();
 
-  if (!row) {
-    document.getElementById("riddle").innerText = "اللغز غير موجود";
-    return;
+    const row = data.find(x => x.id == id);
+
+    if(!row){
+      document.getElementById("riddle").innerText = "❌ اللغز غير موجود";
+      return;
+    }
+
+    window.PUZZLE = row;
+    document.getElementById("riddle").innerText = row.riddle;
+
+  }catch(err){
+    console.error(err);
+    document.getElementById("riddle").innerText =
+      "⚠️ مشكلة في السيرفر أو 429 - حاول بعد دقيقة";
   }
-
-  window.PUZZLE = row;
-  document.getElementById("riddle").innerText = row.riddle;
 }
 
+// =========================
+// CHECK ANSWER
+// =========================
 function normalize(t){
   return t.trim().replace(/\s+/g,'').toLowerCase();
 }
@@ -131,36 +174,42 @@ async function check(){
   const input = document.getElementById("answer").value;
   const msg = document.getElementById("msg");
 
-  if (!input) {
+  if(!input){
     msg.innerText = "اكتب إجابة";
     return;
   }
 
   const row = window.PUZZLE;
-  if (!row) return;
+  if(!row){
+    msg.innerText = "لم يتم تحميل اللغز";
+    return;
+  }
 
-  if (normalize(input) === normalize(row.answer)) {
-    msg.innerText = "✔ إجابة صحيحة";
+  if(normalize(input) === normalize(row.answer)){
+    msg.innerText = "✔ إجابة صحيحة 🎉";
 
     // تحديث مرة واحدة فقط (بدون ضغط)
-    await fetch(`${API}/id/${row.id}`, {
-      method:"PATCH",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        status:"used",
-        winner_time:new Date().toISOString()
-      })
-    });
+    try{
+      await fetch(`${API}/id/${row.id}`, {
+        method:"PATCH",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+          status:"used",
+          winner_time:new Date().toISOString()
+        })
+      });
+    }catch(e){
+      console.log("update failed");
+    }
 
-    setTimeout(()=>{
-      alert("مبروك 🎉");
-    },800);
-
-  } else {
+  }else{
     msg.innerText = "❌ إجابة خاطئة";
   }
 }
 
+// تشغيل
 init();
 </script>
 
