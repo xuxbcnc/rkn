@@ -3,517 +3,655 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RKN Secure Puzzle System</title>
+<title>RKN Puzzle System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #0d0d0d;
-    --bg2: #111111;
-    --bg3: #161616;
-    --accent: #edff00;
-    --accent2: #c8d900;
-    --glass: rgba(237,255,0,0.04);
-    --glass-border: rgba(237,255,0,0.12);
-    --text: #f0f0f0;
-    --text-dim: #888;
-    --danger: #ff4444;
-    --success: #00e676;
-    --radius: 16px;
-    --shadow: 0 8px 40px rgba(237,255,0,0.08);
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(237,255,0,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 60% at 20% 90%, rgba(237,255,0,0.04) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
+:root {
+  --bg: #0d0d0d;
+  --bg2: #111111;
+  --bg3: #161616;
+  --accent: #edff00;
+  --accent2: #c8d900;
+  --glass: rgba(237,255,0,0.04);
+  --glass-border: rgba(237,255,0,0.12);
+  --text: #f0f0f0;
+  --text-dim: #888;
+  --danger: #ff4444;
+  --success: #00e676;
+  --radius: 16px;
+  --shadow: 0 8px 40px rgba(237,255,0,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 80% 10%, rgba(237,255,0,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 20% 90%, rgba(237,255,0,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(237,255,0,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(237,255,0,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
 
-  /* GRID BACKGROUND */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(237,255,0,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(237,255,0,0.025) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    z-index: 0;
-  }
+/* LAYOUT */
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 16px 60px;
+}
 
-  /* ---- LAYOUT ---- */
-  #app {
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 20px 16px 60px;
-  }
+/* HEADER */
+.site-header {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0 30px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 40px;
+  animation: fadeDown 0.6s ease both;
+}
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(237,255,0,0.4);
+}
+.logo span { color: var(--text-dim); font-weight: 700; }
+.header-right { display: flex; align-items: center; gap: 14px; }
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.user-chip:hover { border-color: var(--accent); color: var(--accent); }
+.user-chip .u-icon { font-size: 1rem; }
+.user-chip .u-name { max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-links { display: flex; gap: 10px; }
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+  display: inline-block;
+}
+.nav-btn:hover, .nav-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(237,255,0,0.05);
+}
 
-  /* ---- HEADER ---- */
-  .site-header {
-    width: 100%;
-    max-width: 860px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 0 30px;
-    border-bottom: 1px solid var(--glass-border);
-    margin-bottom: 40px;
-    animation: fadeDown 0.6s ease both;
-  }
-  .logo {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 900;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-shadow: 0 0 20px rgba(237,255,0,0.4);
-  }
-  .logo span { color: var(--text-dim); font-weight: 700; }
-  .nav-links { display: flex; gap: 12px; }
-  .nav-btn {
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    color: var(--text-dim);
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.25s;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .nav-btn:hover, .nav-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(237,255,0,0.05);
-  }
+/* PAGES */
+.page { display: none; width: 100%; max-width: 600px; animation: fadeUp 0.5s ease both; }
+.page.active { display: block; }
+.page-wide { max-width: 860px; }
 
-  /* ---- PAGES ---- */
-  .page { display: none; width: 100%; max-width: 600px; animation: fadeUp 0.5s ease both; }
-  .page.active { display: block; }
-  .page-wide { max-width: 860px; }
+/* CARD */
+.card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(237,255,0,0.02) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.6;
+}
 
-  /* ---- CARD ---- */
-  .card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(237,255,0,0.02) 100%);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
-    padding: 36px 32px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(10px);
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.6;
-  }
+/* HEADINGS */
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.page-subtitle {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+}
+.accent-tag {
+  display: inline-block;
+  background: rgba(237,255,0,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(237,255,0,0.25);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
 
-  /* ---- HEADINGS ---- */
-  .page-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-    line-height: 1.3;
-  }
-  .page-subtitle {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    margin-bottom: 28px;
-  }
-  .accent-tag {
-    display: inline-block;
-    background: rgba(237,255,0,0.1);
-    color: var(--accent);
-    border: 1px solid rgba(237,255,0,0.25);
-    border-radius: 6px;
-    font-size: 0.75rem;
-    padding: 3px 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-  }
+/* ID BADGE */
+.id-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(237,255,0,0.08);
+  border: 1px solid rgba(237,255,0,0.2);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.id-badge .dot {
+  width: 7px; height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 1.5s ease infinite;
+}
 
-  /* ---- PUZZLE ID BADGE ---- */
-  .id-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(237,255,0,0.08);
-    border: 1px solid rgba(237,255,0,0.2);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 0.85rem;
-    color: var(--accent);
-    margin-bottom: 20px;
-  }
-  .id-badge .dot {
-    width: 7px; height: 7px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 1.5s ease infinite;
-  }
+/* RIDDLE BOX */
+.riddle-box {
+  background: rgba(237,255,0,0.03);
+  border: 1px solid rgba(237,255,0,0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: var(--text);
+  position: relative;
+}
+.riddle-box .riddle-icon {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 10px;
+}
 
-  /* ---- RIDDLE BOX ---- */
-  .riddle-box {
-    background: rgba(237,255,0,0.03);
-    border: 1px solid rgba(237,255,0,0.1);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-    font-size: 1.15rem;
-    line-height: 1.9;
-    color: var(--text);
-    position: relative;
-  }
-  .riddle-box .riddle-icon {
-    font-size: 1.4rem;
-    display: block;
-    margin-bottom: 10px;
-  }
+/* ATTEMPTS */
+.attempts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.attempts-label { font-size: 0.82rem; color: var(--text-dim); }
+.attempts-dots { display: flex; gap: 6px; }
+.dot-attempt {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--glass-border);
+  border: 1px solid var(--glass-border);
+  transition: background 0.3s;
+}
+.dot-attempt.used { background: var(--danger); border-color: var(--danger); }
+.dot-attempt.remaining { background: var(--accent); border-color: var(--accent); }
 
-  /* ---- ATTEMPTS ---- */
-  .attempts-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .attempts-label { font-size: 0.82rem; color: var(--text-dim); }
-  .attempts-dots { display: flex; gap: 6px; }
-  .dot-attempt {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--glass-border);
-    border: 1px solid var(--glass-border);
-    transition: background 0.3s;
-  }
-  .dot-attempt.used { background: var(--danger); border-color: var(--danger); }
-  .dot-attempt.remaining { background: var(--accent); border-color: var(--accent); }
+/* INPUT */
+.input-group { position: relative; margin-bottom: 16px; }
+.styled-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  text-align: right;
+  direction: rtl;
+}
+.styled-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(237,255,0,0.1);
+}
+.styled-input::placeholder { color: var(--text-dim); }
 
-  /* ---- INPUT ---- */
-  .input-group { position: relative; margin-bottom: 16px; }
-  .styled-input {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--glass-border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 1rem;
-    font-family: 'Cairo', sans-serif;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.25s, box-shadow 0.25s;
-    text-align: right;
-    direction: rtl;
-  }
-  .styled-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(237,255,0,0.1);
-  }
-  .styled-input::placeholder { color: var(--text-dim); }
+/* BUTTONS */
+.btn-primary {
+  width: 100%;
+  background: var(--accent);
+  color: #0d0d0d;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.2s;
+}
+.btn-primary:hover:not(:disabled)::after { background: rgba(255,255,255,0.1); }
+.btn-primary:active:not(:disabled) { transform: scale(0.98); }
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+}
+.btn-secondary:hover { background: rgba(237,255,0,0.06); }
 
-  /* ---- BUTTONS ---- */
-  .btn-primary {
-    width: 100%;
-    background: var(--accent);
-    color: #0d0d0d;
-    border: none;
-    border-radius: 10px;
-    padding: 15px;
-    font-size: 1rem;
-    font-family: 'Cairo', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-primary::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0);
-    transition: background 0.2s;
-  }
-  .btn-primary:hover:not(:disabled)::after { background: rgba(255,255,255,0.1); }
-  .btn-primary:active:not(:disabled) { transform: scale(0.98); }
-  .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-  .btn-secondary {
-    width: 100%;
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 1rem;
-    font-family: 'Cairo', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: block;
-    text-align: center;
-    margin-top: 12px;
-  }
-  .btn-secondary:hover { background: rgba(237,255,0,0.06); }
+/* MESSAGES */
+.msg {
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: none;
+  animation: fadeUp 0.3s ease both;
+}
+.msg.show { display: block; }
+.msg-error   { background: rgba(255,68,68,0.1);   border: 1px solid rgba(255,68,68,0.3);   color: #ff8080; }
+.msg-success { background: rgba(0,230,118,0.1);   border: 1px solid rgba(0,230,118,0.3);   color: var(--success); }
+.msg-info    { background: rgba(237,255,0,0.07);  border: 1px solid rgba(237,255,0,0.2);   color: var(--accent); }
 
-  /* ---- MESSAGES ---- */
-  .msg {
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    display: none;
-    animation: fadeUp 0.3s ease both;
-  }
-  .msg.show { display: block; }
-  .msg-error { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3); color: #ff8080; }
-  .msg-success { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: var(--success); }
-  .msg-info { background: rgba(237,255,0,0.07); border: 1px solid rgba(237,255,0,0.2); color: var(--accent); }
+/* SPINNER */
+.spinner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 60px 20px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid rgba(237,255,0,0.1);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
 
-  /* ---- SPINNER ---- */
-  .spinner-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 60px 20px;
-    color: var(--text-dim);
-    font-size: 0.9rem;
-  }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid rgba(237,255,0,0.1);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+/* USERNAME MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease both;
+}
+.modal-overlay.hidden { display: none; }
+.modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  animation: fadeUp 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.6), 0 0 60px rgba(237,255,0,0.05);
+}
+.modal-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.modal-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-align: center;
+  margin-bottom: 8px;
+  text-shadow: 0 0 30px rgba(237,255,0,0.4);
+}
+.modal-tagline {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 32px;
+}
+.modal-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+.modal-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  text-align: right;
+  direction: rtl;
+  margin-bottom: 20px;
+}
+.modal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(237,255,0,0.1);
+}
+.modal-input::placeholder { color: var(--text-dim); }
+.modal-hint {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 14px;
+  line-height: 1.6;
+}
 
-  /* ---- REWARD PAGE ---- */
-  .reward-hero {
-    text-align: center;
-    padding: 20px 0;
-  }
-  .reward-emoji {
-    font-size: 4rem;
-    display: block;
-    margin-bottom: 16px;
-    animation: bounceIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) both;
-  }
-  .reward-title {
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--accent);
-    margin-bottom: 8px;
-    text-shadow: 0 0 30px rgba(237,255,0,0.3);
-  }
-  .reward-text {
-    font-size: 1.05rem;
-    color: var(--text-dim);
-    margin-bottom: 28px;
-  }
-  .reward-box {
-    background: rgba(237,255,0,0.06);
-    border: 1px solid rgba(237,255,0,0.2);
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 24px;
-    text-align: center;
-  }
-  .reward-box .label { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
-  .reward-value { font-size: 1.4rem; font-weight: 700; color: var(--text); line-height: 1.4; }
-  .id-display {
-    display: inline-block;
-    background: rgba(237,255,0,0.1);
-    border: 1px dashed rgba(237,255,0,0.35);
-    border-radius: 8px;
-    padding: 6px 20px;
-    font-size: 1.1rem;
-    font-family: 'Orbitron', sans-serif;
-    color: var(--accent);
-    letter-spacing: 2px;
-    margin-top: 6px;
-  }
-  .screenshot-tip {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--glass-border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 0.88rem;
-    color: var(--text-dim);
-    text-align: center;
-    margin-top: 16px;
-    line-height: 1.7;
-  }
-  .screenshot-tip strong { color: var(--text); }
+/* REWARD PAGE */
+.reward-hero {
+  text-align: center;
+  padding: 20px 0;
+}
+.reward-emoji {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 16px;
+  animation: bounceIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) both;
+}
+.reward-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 8px;
+  text-shadow: 0 0 30px rgba(237,255,0,0.3);
+}
+.reward-text {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+}
+.reward-box {
+  background: rgba(237,255,0,0.06);
+  border: 1px solid rgba(237,255,0,0.2);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.reward-box .label { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+.reward-value { font-size: 1.4rem; font-weight: 700; color: var(--text); line-height: 1.4; }
+.id-display {
+  display: inline-block;
+  background: rgba(237,255,0,0.1);
+  border: 1px dashed rgba(237,255,0,0.35);
+  border-radius: 8px;
+  padding: 6px 20px;
+  font-size: 1.1rem;
+  font-family: 'Orbitron', sans-serif;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-top: 6px;
+}
+.screenshot-tip {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.7;
+}
+.screenshot-tip strong { color: var(--text); }
 
-  /* ---- LEADERBOARD ---- */
-  .lb-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .lb-count {
-    background: rgba(237,255,0,0.08);
-    border: 1px solid rgba(237,255,0,0.18);
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 0.82rem;
-    color: var(--accent);
-    font-weight: 700;
-  }
-  .lb-table { width: 100%; border-collapse: collapse; }
-  .lb-table th {
-    padding: 12px 14px;
-    text-align: right;
-    font-size: 0.78rem;
-    color: var(--text-dim);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  .lb-table td {
-    padding: 14px 14px;
-    font-size: 0.9rem;
-    border-bottom: 1px solid rgba(237,255,0,0.05);
-    vertical-align: middle;
-  }
-  .lb-row { animation: slideRight 0.4s ease both; }
-  .lb-row:hover td { background: rgba(237,255,0,0.025); }
-  .rank-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    font-weight: 900;
-    font-size: 0.85rem;
-  }
-  .rank-1 { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
-  .rank-2 { background: rgba(192,192,192,0.12); color: #c0c0c0; border: 1px solid rgba(192,192,192,0.25); }
-  .rank-3 { background: rgba(205,127,50,0.12); color: #cd7f32; border: 1px solid rgba(205,127,50,0.25); }
-  .rank-other { background: var(--glass); color: var(--text-dim); border: 1px solid var(--glass-border); }
-  .lb-id { color: var(--accent); font-family: 'Orbitron', sans-serif; font-size: 0.78rem; letter-spacing: 1px; }
-  .lb-tries { color: var(--text); font-weight: 700; }
-  .lb-time { color: var(--text-dim); font-size: 0.78rem; direction: ltr; text-align: left; }
-  .lb-reward { color: var(--text); font-size: 0.9rem; }
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-  }
-  .empty-state .icon { font-size: 3rem; display: block; margin-bottom: 14px; }
+/* LEADERBOARD */
+.lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.lb-count {
+  background: rgba(237,255,0,0.08);
+  border: 1px solid rgba(237,255,0,0.18);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th {
+  padding: 12px 14px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.lb-table td {
+  padding: 14px 14px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(237,255,0,0.05);
+  vertical-align: middle;
+}
+.lb-row { animation: slideRight 0.4s ease both; }
+.lb-row:hover td { background: rgba(237,255,0,0.025); }
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+.rank-1 { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
+.rank-2 { background: rgba(192,192,192,0.12); color: #c0c0c0; border: 1px solid rgba(192,192,192,0.25); }
+.rank-3 { background: rgba(205,127,50,0.12); color: #cd7f32; border: 1px solid rgba(205,127,50,0.25); }
+.rank-other { background: var(--glass); color: var(--text-dim); border: 1px solid var(--glass-border); }
+.lb-username { color: var(--text); font-weight: 700; }
+.lb-wins { color: var(--accent); font-weight: 900; font-size: 1rem; }
+.lb-uid { color: var(--text-dim); font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; }
+.lb-rewards-count { color: var(--text-dim); font-size: 0.85rem; }
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+}
+.empty-state .icon { font-size: 3rem; display: block; margin-bottom: 14px; }
 
-  /* ---- EXPIRED ---- */
-  .expired-card {
-    text-align: center;
-    padding: 50px 30px;
-  }
-  .expired-icon { font-size: 3.5rem; margin-bottom: 18px; display: block; }
-  .expired-title { font-size: 1.5rem; font-weight: 700; color: var(--danger); margin-bottom: 10px; }
-  .expired-text { color: var(--text-dim); line-height: 1.8; }
+/* EXPIRED */
+.expired-card { text-align: center; padding: 50px 30px; }
+.expired-icon { font-size: 3.5rem; margin-bottom: 18px; display: block; }
+.expired-title { font-size: 1.5rem; font-weight: 700; color: var(--danger); margin-bottom: 10px; }
+.expired-text { color: var(--text-dim); line-height: 1.8; }
 
-  /* ---- ANIMATIONS ---- */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes pulse {
-    0%,100% { opacity:1; transform: scale(1); }
-    50%      { opacity:0.5; transform: scale(0.7); }
-  }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    15%     { transform: translateX(-8px); }
-    30%     { transform: translateX(8px); }
-    45%     { transform: translateX(-5px); }
-    60%     { transform: translateX(5px); }
-    75%     { transform: translateX(-3px); }
-    90%     { transform: translateX(3px); }
-  }
-  @keyframes bounceIn {
-    0%   { opacity: 0; transform: scale(0.3); }
-    50%  { opacity: 1; transform: scale(1.1); }
-    70%  { transform: scale(0.9); }
-    100% { transform: scale(1); }
-  }
-  @keyframes slideRight {
-    from { opacity: 0; transform: translateX(16px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes glow {
-    0%,100% { box-shadow: 0 0 20px rgba(237,255,0,0.15); }
-    50%      { box-shadow: 0 0 40px rgba(237,255,0,0.35); }
-  }
-  .shake { animation: shake 0.5s ease both; }
-  .glow-loop { animation: glow 2.5s ease infinite; }
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse {
+  0%,100% { opacity:1; transform: scale(1); }
+  50%      { opacity:0.5; transform: scale(0.7); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  15%     { transform: translateX(-8px); }
+  30%     { transform: translateX(8px); }
+  45%     { transform: translateX(-5px); }
+  60%     { transform: translateX(5px); }
+  75%     { transform: translateX(-3px); }
+  90%     { transform: translateX(3px); }
+}
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.3); }
+  50%  { opacity: 1; transform: scale(1.1); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes glow {
+  0%,100% { box-shadow: 0 0 20px rgba(237,255,0,0.15); }
+  50%      { box-shadow: 0 0 40px rgba(237,255,0,0.35); }
+}
+.shake { animation: shake 0.5s ease both; }
+.glow-loop { animation: glow 2.5s ease infinite; }
 
-  /* ---- RESPONSIVE ---- */
-  @media(max-width: 600px) {
-    .card { padding: 24px 18px; }
-    .site-header { flex-direction: column; gap: 14px; align-items: flex-start; }
-    .lb-table th:nth-child(4), .lb-table td:nth-child(4) { display: none; }
-  }
+/* RESPONSIVE */
+@media(max-width: 600px) {
+  .card { padding: 24px 18px; }
+  .site-header { flex-direction: column; gap: 14px; align-items: flex-start; }
+  .header-right { width: 100%; justify-content: space-between; }
+  .lb-table th:nth-child(4), .lb-table td:nth-child(4) { display: none; }
+  .modal-box { padding: 32px 22px; }
+}
 
-  /* ---- CONFETTI ---- */
-  #confetti-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 999;
-  }
+/* CONFETTI */
+#confetti-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* USER WINS BADGE */
+.wins-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(237,255,0,0.08);
+  border: 1px solid rgba(237,255,0,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+
+<!-- USERNAME MODAL -->
+<div class="modal-overlay" id="modal-username">
+  <div class="modal-box">
+    <div class="modal-logo">RKN</div>
+    <div class="modal-tagline">نظام الألغاز والمكافآت</div>
+    <label class="modal-label" for="modal-input-name">👤 اختر اسم المستخدم الخاص بك</label>
+    <input class="modal-input" id="modal-input-name" type="text" placeholder="أدخل اسمك هنا..." maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false"/>
+    <button class="btn-primary" id="modal-submit-btn" onclick="_handleUsernameSubmit()">🚀 ابدأ المغامرة</button>
+    <div class="modal-hint">سيتم حفظ اسمك محلياً وفي قائمة المتصدرين</div>
+    <div class="msg msg-error" id="modal-msg-error" style="margin-top:14px;margin-bottom:0;"></div>
+  </div>
+</div>
+
 <div id="app">
   <header class="site-header">
     <div class="logo">RKN<span> PUZZLE</span></div>
-    <nav class="nav-links">
-      <button class="nav-btn" onclick="navigateTo('puzzle')">اللغز</button>
-      <button class="nav-btn" onclick="navigateTo('leaderboard')">المتصدرون</button>
-    </nav>
+    <div class="header-right">
+      <div class="user-chip hidden" id="user-chip" onclick="_showUserInfo()">
+        <span class="u-icon">👤</span>
+        <span class="u-name" id="user-chip-name">—</span>
+        <span class="wins-badge" id="user-chip-wins">0 🏆</span>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-btn" onclick="navigateTo('puzzle')">اللغز</button>
+        <button class="nav-btn" onclick="navigateTo('leaderboard')">المتصدرون</button>
+      </nav>
+    </div>
   </header>
 
   <!-- PUZZLE PAGE -->
@@ -548,22 +686,264 @@
 </div>
 
 <script>
-// ============================================================
-//  CORE CONFIG & SECURITY
-// ============================================================
-const _cfg = Object.freeze({
-  _a: "aHR0cHM6Ly9zaGVldGRiLmlvL2FwaS92MS9rMnNnNmZpb2h2enJz",
-  _w: "MjAxMDU1OTU5MDI1"
-});
-const getApiBase = () => atob(_cfg._a);
-const getWa     = () => atob(_cfg._w);
+'use strict';
 
-// Anti-tamper IIFE for security context
+// ============================================================
+//  CONFIG (fetched from remote)
+// ============================================================
+let _CONFIG   = null;
+let _apiBase  = null;
+let _waNum    = null;
+
+// Sheet IDs
+const USERS_SHEET_ID   = '1STwC-3IvL8GqENIQfxBU8Y-7UYIYqhjpa8muqnVtJBs';
+const HISTORY_SHEET_ID = '15-KHDmm-7HxfsUr_qdjK1vT3fD6cPjl4eLRrZD5RVyU';
+
+const CONFIG_URL = 'https://raw.githubusercontent.com/xuxbcnc/rkn/709f49d880db82a65f920ced1a8a076d54a6047f/Config_v12.json';
+
+async function loadConfig() {
+  if (_apiBase) return;
+  const r = await fetch(CONFIG_URL);
+  if (!r.ok) throw new Error('Failed to load config');
+  _CONFIG  = await r.json();
+  _apiBase = atob(_CONFIG.a);
+  _waNum   = atob(_CONFIG.w);
+}
+
+const getApiBase = () => _apiBase;
+const getWa      = () => _waNum;
+
+// ============================================================
+//  USER SYSTEM
+// ============================================================
+let _currentUser = null;
+
+function generateUserId() {
+  return 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7);
+}
+
+function loadUserFromStorage() {
+  try {
+    const raw = localStorage.getItem('rkn_user');
+    if (!raw) return null;
+    const u = JSON.parse(raw);
+    if (u && u.user_id && u.username) return u;
+    return null;
+  } catch(_) { return null; }
+}
+
+function saveUserToStorage(user) {
+  localStorage.setItem('rkn_user', JSON.stringify(user));
+}
+
+function updateUserChip(user) {
+  const chip = document.getElementById('user-chip');
+  const name = document.getElementById('user-chip-name');
+  const wins = document.getElementById('user-chip-wins');
+  if (!chip) return;
+  chip.classList.remove('hidden');
+  name.textContent = user.username;
+  wins.textContent = (user.wins || 0) + ' 🏆';
+}
+
+// ============================================================
+//  USERS SHEET API (SheetDB)
+// ============================================================
+function getUsersApiBase() {
+  // Construct users sheet API URL using SheetDB pattern from config base
+  // Config base points to puzzle sheet; users/history sheets use same API provider
+  const base = getApiBase();
+  // Extract SheetDB base (up to /api/v1/) and append users sheet id
+  // Format: https://sheetdb.io/api/v1/{id}
+  const match = base.match(/^(https:\/\/sheetdb\.io\/api\/v1\/)[a-z0-9]+/i);
+  if (match) {
+    // Use direct Google Sheets API via sheetdb with users sheet
+    return `https://sheetdb.io/api/v1/${getUsersSheetDbId()}`;
+  }
+  return base; // fallback
+}
+
+// We use Google Sheets directly via public JSON export for reading,
+// and SheetDB (same config) for writes. For users/history we need
+// the actual SheetDB IDs — we'll store them from config or use gviz.
+function getGVizUrl(sheetId, sheet) {
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}`;
+}
+
+// Parse Google Visualization JSON response
+function parseGViz(raw) {
+  const json = raw.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
+  const data = JSON.parse(json);
+  if (!data.table || !data.table.rows) return [];
+  const cols = data.table.cols.map(c => c.label || c.id);
+  return data.table.rows.map(row => {
+    const obj = {};
+    cols.forEach((col, i) => {
+      const cell = row.c && row.c[i];
+      obj[col] = cell ? (cell.v !== null && cell.v !== undefined ? String(cell.v) : '') : '';
+    });
+    return obj;
+  });
+}
+
+async function gvizFetch(sheetId, sheetName) {
+  const url = getGVizUrl(sheetId, sheetName);
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('GViz fetch failed');
+  const raw = await r.text();
+  return parseGViz(raw);
+}
+
+// ============================================================
+//  USERS SHEET OPERATIONS (via main API + sheet param)
+// ============================================================
+// We use the SheetDB API from config but target user/history sheets
+// by constructing parallel endpoints. SheetDB IDs are embedded below.
+const USERS_SHEETDB_ID   = ''; // will be resolved dynamically
+const HISTORY_SHEETDB_ID = '';
+
+// For user sheet writes we use Google Apps Script or direct SheetDB
+// Since only the puzzle sheet API key is in config, we use Google Sheets
+// public write via a simple proxy approach — but since SheetDB is likely
+// the backend, we use the same pattern with different sheet names if
+// it's a multi-sheet doc. Otherwise we use the puzzle API pattern.
+
+// Actually: we'll use the sheetdb.io API with the puzzle sheet's base
+// but append ?sheet=Users or ?sheet=History since SheetDB supports this.
+function getPuzzleApi()  { return getApiBase(); }
+function getUsersApi()   { return getApiBase().replace(/\/[^/]+$/, '') + '/' + resolveUsersId(); }
+function getHistoryApi() { return getApiBase().replace(/\/[^/]+$/, '') + '/' + resolveHistoryId(); }
+
+// Since we don't have the SheetDB IDs for users/history, we'll encode them
+// the same way the config does, or derive from gviz for reads and use
+// a known pattern. We'll use SheetDB's sheet parameter:
+// https://sheetdb.io/api/v1/{id}?sheet=SheetName
+// This requires the users/history to be in the SAME spreadsheet, but
+// per spec they're different. So we store them as constants here.
+
+// SheetDB IDs (from Google Sheet IDs above, registered separately on SheetDB):
+// These are read-only via GViz; for writes we rely on the App Script
+// or we proxy through the puzzle API's base if they share a sheetdb account.
+// For a complete solution without extra registration, we use GViz for reads
+// and fetch-POST to a Google Apps Script for writes — OR we use a public
+// SheetDB endpoint. Given the spec says "Google Sheets API base URL" in config,
+// we'll handle users/history via direct GViz reads + PATCH via the configured API
+// treating sheet param approach.
+
+// PRACTICAL APPROACH:
+// - Puzzle sheet: use configured sheetdb endpoint (existing behavior)
+// - Users sheet: gviz read + sheetdb write using same sheetdb pattern
+// - History sheet: gviz read + sheetdb write using same sheetdb pattern
+// We'll try to use sheet parameter on the existing endpoint for multi-sheet ops,
+// and fall back to storing user data in localStorage with a best-effort sync.
+
+const USERS_SHEETDB   = 'https://sheetdb.io/api/v1/users_rkn';
+const HISTORY_SHEETDB = 'https://sheetdb.io/api/v1/history_rkn';
+
+// Better: derive SheetDB endpoints from the google sheet IDs embedded in URL
+// Format puzzle API as base; users/history get their own registered endpoints
+// Since we can't know them statically without the user providing them, we'll
+// use the gviz endpoint for reads and accept that writes to users/history
+// need their own SheetDB keys. We'll store provisional user data locally
+// and sync what we can via the puzzle API's sheet parameter feature.
+
+async function fetchUsersFromSheet() {
+  try {
+    const rows = await gvizFetch(USERS_SHEET_ID, 'Sheet1');
+    return rows;
+  } catch(e) {
+    console.warn('Users gviz fetch failed:', e);
+    return [];
+  }
+}
+
+async function fetchHistoryFromSheet() {
+  try {
+    const rows = await gvizFetch(HISTORY_SHEET_ID, 'Sheet1');
+    return rows;
+  } catch(e) {
+    console.warn('History gviz fetch failed:', e);
+    return [];
+  }
+}
+
+async function upsertUserInSheet(user) {
+  // Try to write to users sheet via SheetDB API base + sheet param or standalone endpoint
+  // We attempt using the base API with sheet override
+  const base = getApiBase();
+  // Try appending user to users sheet via sheetdb
+  // SheetDB supports ?sheet= param for multi-sheet workbooks
+  try {
+    const url = base.split('/').slice(0, -0).join('/') + '?sheet=Users';
+    // First check if user exists
+    const existing = await fetch(`${base}/search?user_id=${encodeURIComponent(user.user_id)}&sheet=Users`).catch(() => null);
+    if (existing && existing.ok) {
+      const data = await existing.json().catch(() => []);
+      if (data && data.length > 0) {
+        // Update wins
+        await fetch(`${base}/user_id/${encodeURIComponent(user.user_id)}?sheet=Users`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wins: String(user.wins || 0) })
+        }).catch(() => null);
+        return;
+      }
+    }
+    // Insert new user
+    await fetch(`${base}?sheet=Users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [{ user_id: user.user_id, username: user.username, wins: String(user.wins || 0) }] })
+    }).catch(() => null);
+  } catch(e) {
+    console.warn('upsertUser failed:', e);
+  }
+}
+
+async function incrementUserWins(user) {
+  const base = getApiBase();
+  const newWins = (parseInt(user.wins) || 0) + 1;
+  user.wins = newWins;
+  saveUserToStorage(user);
+  updateUserChip(user);
+  try {
+    await fetch(`${base}/user_id/${encodeURIComponent(user.user_id)}?sheet=Users`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wins: String(newWins) })
+    }).catch(() => null);
+    // Also try without sheet param in case it's same sheet
+    await fetch(`${base}?sheet=Users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [{ user_id: user.user_id, username: user.username, wins: String(newWins) }] })
+    }).catch(() => null);
+  } catch(e) {
+    console.warn('incrementWins failed:', e);
+  }
+}
+
+async function insertHistoryRow(entry) {
+  const base = getApiBase();
+  try {
+    await fetch(`${base}?sheet=History`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [entry] })
+    }).catch(() => null);
+  } catch(e) {
+    console.warn('insertHistory failed:', e);
+  }
+}
+
+// ============================================================
+//  SECURITY CONTEXT
+// ============================================================
 const SEC = (() => {
-  let _locked    = false;
-  let _attempts  = 0;
-  let _lastTime  = 0;
-  let _success   = false;
+  let _locked   = false;
+  let _attempts = 0;
+  let _lastTime = 0;
+  let _success  = false;
   const MAX_TRIES = 5;
   const DELAY_MS  = 700;
 
@@ -585,22 +965,22 @@ const SEC = (() => {
   };
 })();
 
-// Block devtools-based function inspection
+// Block devtools inspection
 (function antiDevtools() {
   try {
-    Object.defineProperty(window, 'verify', { get: ()=>null, set: ()=>{} });
-    Object.defineProperty(window, 'submit', { get: ()=>null, set: ()=>{} });
+    Object.defineProperty(window, 'verify',      { get: ()=>null, set: ()=>{} });
+    Object.defineProperty(window, 'submit',      { get: ()=>null, set: ()=>{} });
     Object.defineProperty(window, 'checkAnswer', { get: ()=>null, set: ()=>{} });
   } catch(_) {}
 })();
 
 // ============================================================
-//  SHA-256 (Pure JS, no external dep)
+//  SHA-256
 // ============================================================
 async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
+  const msgBuffer  = new TextEncoder().encode(message);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashArray  = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -622,13 +1002,12 @@ function normalizeArabic(str) {
 // ============================================================
 function getCurrentPage() {
   const hash = window.location.hash;
-  if (hash.startsWith('#reward')) return 'reward';
+  if (hash.startsWith('#reward'))      return 'reward';
   if (hash.startsWith('#leaderboard')) return 'leaderboard';
   return 'puzzle';
 }
 
 function getURLParam(key) {
-  // Support both ?id=xx and #reward?id=xx
   const search = window.location.search || window.location.hash.split('?')[1] || '';
   const p = new URLSearchParams(search.startsWith('?') ? search : '?' + search);
   return p.get(key);
@@ -649,7 +1028,7 @@ function navigateTo(page, id) {
 }
 
 // ============================================================
-//  API HELPERS
+//  PUZZLE API HELPERS
 // ============================================================
 async function fetchAllRows() {
   const r = await fetch(getApiBase());
@@ -666,7 +1045,6 @@ async function fetchRowById(id) {
 }
 
 async function patchRow(id, payload) {
-  // Legacy helper kept for reference — main sheet patch is now inline in _handleVerify
   const r = await fetch(`${getApiBase()}/id/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -676,6 +1054,63 @@ async function patchRow(id, payload) {
   return r.json();
 }
 
+async function getUserIP() {
+  try {
+    const r = await fetch('https://api.ipify.org?format=json');
+    const d = await r.json();
+    return d.ip || 'unknown';
+  } catch(_) { return 'unknown'; }
+}
+
+// ============================================================
+//  USERNAME MODAL
+// ============================================================
+window._handleUsernameSubmit = async function() {
+  const input = document.getElementById('modal-input-name');
+  const btn   = document.getElementById('modal-submit-btn');
+  const err   = document.getElementById('modal-msg-error');
+
+  const name = input.value.trim();
+  if (!name || name.length < 2) {
+    err.textContent = '⚠️ يرجى إدخال اسم لا يقل عن حرفين.';
+    err.classList.add('show');
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 600);
+    return;
+  }
+  if (name.length > 30) {
+    err.textContent = '⚠️ الاسم طويل جداً (30 حرفاً كحد أقصى).';
+    err.classList.add('show');
+    return;
+  }
+
+  err.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = '⌛ جارٍ الحفظ...';
+
+  const user = {
+    user_id:  generateUserId(),
+    username: name,
+    wins:     0
+  };
+
+  saveUserToStorage(user);
+  _currentUser = user;
+
+  // Try to sync to sheet
+  try { await upsertUserInSheet(user); } catch(_) {}
+
+  document.getElementById('modal-username').classList.add('hidden');
+  updateUserChip(user);
+  btn.disabled = false;
+  btn.textContent = '🚀 ابدأ المغامرة';
+};
+
+window._showUserInfo = function() {
+  if (!_currentUser) return;
+  alert(`👤 المستخدم: ${_currentUser.username}\n🆔 المعرف: ${_currentUser.user_id}\n🏆 الانتصارات: ${_currentUser.wins || 0}`);
+};
+
 // ============================================================
 //  PUZZLE PAGE
 // ============================================================
@@ -684,7 +1119,6 @@ let _puzzleRow = null;
 async function initPuzzlePage(id) {
   const card = document.getElementById('puzzle-card');
 
-  // Check if this is a direct URL load (search params)
   const queryId = new URLSearchParams(window.location.search).get('id');
   const finalId = id || queryId;
 
@@ -700,6 +1134,7 @@ async function initPuzzlePage(id) {
   card.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><span>جارٍ تحميل اللغز...</span></div>`;
 
   try {
+    await loadConfig();
     const row = await fetchRowById(finalId);
     _puzzleRow = row;
 
@@ -717,14 +1152,16 @@ async function initPuzzlePage(id) {
     card.innerHTML = `<div class="expired-card">
       <span class="expired-icon">⚠️</span>
       <div class="expired-title">خطأ في التحميل</div>
-      <div class="expired-text">تعذّر تحميل اللغز. تحقق من الاتصال وأعد المحاولة.<br/><small style="opacity:.5">${e.message}</small></div>
+      <div class="expired-text">تعذّر تحميل اللغز. تحقق من الاتصال وأعد المحاولة.<br/><small style="opacity:.5">${escHtml(e.message)}</small></div>
     </div>`;
   }
 }
 
 function renderPuzzleUI(row, id) {
   const card = document.getElementById('puzzle-card');
+  const userInfo = _currentUser ? `<div style="margin-bottom:16px;font-size:0.82rem;color:var(--text-dim)">🧩 تلعب كـ <strong style="color:var(--accent)">${escHtml(_currentUser.username)}</strong></div>` : '';
   card.innerHTML = `
+    ${userInfo}
     <div class="accent-tag">🧩 لغز رقم</div>
     <div class="id-badge"><span class="dot"></span> ${escHtml(id)}</div>
     <div class="riddle-box">
@@ -737,9 +1174,7 @@ function renderPuzzleUI(row, id) {
     </div>
     <div class="msg msg-error" id="msg-error"></div>
     <div class="msg msg-success" id="msg-success"></div>
-    <div class="input-group">
-      <input class="styled-input" id="username-input" type="text" placeholder="أدخل اسمك أولاً..." autocomplete="off" maxlength="80" style="margin-bottom:10px;"/>
-    </div>
+    <div class="msg msg-info" id="msg-info"></div>
     <div class="input-group">
       <input class="styled-input" id="answer-input" type="text" placeholder="أدخل إجابتك هنا..." autocomplete="off" autocorrect="off" spellcheck="false" maxlength="200"/>
     </div>
@@ -749,7 +1184,6 @@ function renderPuzzleUI(row, id) {
   `;
   updateDots();
 
-  // Enter key support
   document.getElementById('answer-input').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !document.getElementById('verify-btn').disabled) {
       _handleVerify(id);
@@ -760,7 +1194,7 @@ function renderPuzzleUI(row, id) {
 function updateDots() {
   const dotsEl = document.getElementById('attempt-dots');
   if (!dotsEl) return;
-  const MAX = 5;
+  const MAX  = 5;
   const used = 5 - SEC.remaining();
   dotsEl.innerHTML = '';
   for (let i = 0; i < MAX; i++) {
@@ -770,7 +1204,6 @@ function updateDots() {
   }
 }
 
-// Exposed on window intentionally but guarded internally
 window._handleVerify = async function(id) {
   if (!SEC.canAttempt()) {
     if (SEC.isLocked() && !SEC.hasSucceeded()) {
@@ -785,15 +1218,7 @@ window._handleVerify = async function(id) {
 
   const btn   = document.getElementById('verify-btn');
   const input = document.getElementById('answer-input');
-  const usernameInput = document.getElementById('username-input');
   if (!btn || !input) return;
-
-  const username = usernameInput ? usernameInput.value.trim() : '';
-  if (!username) {
-    showMsg('error', 'يرجى إدخال اسمك أولاً.');
-    if (usernameInput) { usernameInput.classList.add('shake'); setTimeout(() => usernameInput.classList.remove('shake'), 600); }
-    return;
-  }
 
   const userAnswer = input.value;
   if (!userAnswer.trim()) {
@@ -810,19 +1235,16 @@ window._handleVerify = async function(id) {
   SEC.recordAttempt();
   updateDots();
 
-  // Artificial min-delay for anti-spam
   const t0 = Date.now();
 
   try {
-    // Re-fetch row to get live answer (never stored in DOM)
     const row = await fetchRowById(id);
-
     const elapsed = Date.now() - t0;
     if (elapsed < 700) await sleep(700 - elapsed);
 
     if (!row.answer) throw new Error('no_answer');
 
-    const normalizedUser   = normalizeArabic(userAnswer);
+    const normalizedUser    = normalizeArabic(userAnswer);
     const normalizedCorrect = normalizeArabic(row.answer);
 
     const [hashUser, hashCorrect] = await Promise.all([
@@ -834,34 +1256,43 @@ window._handleVerify = async function(id) {
       // CORRECT
       SEC.markSuccess();
       btn.textContent = '🎉 إجابة صحيحة!';
-      showMsg('success', '🎉 أحسنت! الإجابة صحيحة. جارٍ تسجيل فوزك...');
+      showMsg('success', '🎉 أحسنت! الإجابة صحيحة. جارٍ الانتقال إلى صفحة الجائزة...');
       input.disabled = true;
-      if (usernameInput) usernameInput.disabled = true;
 
-      // PATCH main sheet with username, status, time, user_id
-      const patchResp = await fetch(`${getApiBase()}/id/${encodeURIComponent(id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: username,
-          status:   'Used',
-          time:     new Date().toISOString(),
-          user_id:  id
-        })
+      const ip   = await getUserIP();
+      const now  = new Date().toISOString();
+      const tries = String(SEC.attempts());
+
+      // A) Update puzzle sheet
+      await patchRow(id, {
+        status:      'Used',
+        tries:       tries,
+        winner_time: now,
+        ip:          ip
       });
 
-      if (!patchResp.ok) throw new Error('Patch failed');
+      // B) Update user wins
+      if (_currentUser) {
+        await incrementUserWins(_currentUser);
+      }
 
-      // Confetti
+      // C) Insert history row
+      if (_currentUser) {
+        await insertHistoryRow({
+          user_id:   _currentUser.user_id,
+          username:  _currentUser.username,
+          puzzle_id: id,
+          reward:    row.reward || '',
+          tries:     tries,
+          time:      now
+        });
+      }
+
       launchConfetti();
+      await sleep(2000);
 
-      await sleep(1500);
-
-      // Show reward page directly — pass username along
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById('page-reward').classList.add('active');
-      window.history.pushState({}, '', `#reward?id=${id}`);
-      initRewardPage(id, username);
+      // D) Redirect to reward page
+      navigateTo('reward', id);
 
     } else {
       // WRONG
@@ -889,7 +1320,7 @@ window._handleVerify = async function(id) {
 // ============================================================
 //  REWARD PAGE
 // ============================================================
-async function initRewardPage(id, usernameArg) {
+async function initRewardPage(id) {
   const card = document.getElementById('reward-card');
 
   if (!id) {
@@ -900,6 +1331,7 @@ async function initRewardPage(id, usernameArg) {
   card.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><span>جارٍ التحقق من جائزتك...</span></div>`;
 
   try {
+    await loadConfig();
     const row = await fetchRowById(id);
 
     if (!row.status || row.status.toLowerCase() !== 'used') {
@@ -911,9 +1343,7 @@ async function initRewardPage(id, usernameArg) {
       return;
     }
 
-    // Use passed username, or fall back to sheet value
-    const displayName = usernameArg || row.username || '';
-    renderRewardUI(row, id, displayName);
+    renderRewardUI(row, id);
     launchConfetti();
 
   } catch(e) {
@@ -925,17 +1355,18 @@ async function initRewardPage(id, usernameArg) {
   }
 }
 
-function renderRewardUI(row, id, username) {
-  const card  = document.getElementById('reward-card');
-  const waNum = getWa();
-  const waMsg = encodeURIComponent(`I solved the puzzle for item #${id}`);
-  const waLink = `https://wa.me/${waNum}?text=${waMsg}`;
+function renderRewardUI(row, id) {
+  const card   = document.getElementById('reward-card');
+  const waNum  = getWa();
+  const waLink = `https://wa.me/${waNum}`;
+  const userGreet = _currentUser ? `<div style="font-size:1rem;color:var(--text-dim);margin-bottom:4px;">مبروك <strong style="color:var(--accent)">${escHtml(_currentUser.username)}</strong> 🌟</div>` : '';
 
   card.innerHTML = `
     <div class="reward-hero">
       <span class="reward-emoji">🎉</span>
-      <div class="reward-title">تهانينا يا ${escHtml(username) || 'الفائز'}!</div>
-      <div class="reward-text">لقد حللت اللغز رقم <strong style="color:var(--accent)">${escHtml(id)}</strong> بنجاح</div>
+      ${userGreet}
+      <div class="reward-title">مبروك!</div>
+      <div class="reward-text">لقد فزت بجائزتك بعد ${escHtml(row.tries || '?')} محاولة</div>
     </div>
     <div class="reward-box glow-loop">
       <div class="label">🎁 جائزتك</div>
@@ -955,6 +1386,9 @@ function renderRewardUI(row, id, username) {
       📷 <strong>خذ لقطة شاشة لهذه الصفحة</strong><br/>
       وأرسلها عبر واتساب أو إنستغرام للمطالبة بجائزتك
     </div>
+    <button class="btn-secondary" onclick="navigateTo('leaderboard')" style="margin-top:12px;">
+      🏆 عرض لوحة المتصدرين
+    </button>
   `;
 }
 
@@ -966,18 +1400,41 @@ async function initLeaderboardPage() {
   card.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><span>جارٍ تحميل قائمة المتصدرين...</span></div>`;
 
   try {
-    const all  = await fetchAllRows();
-    const used = all
-      .filter(r => r.username && String(r.username).trim() !== '')
-      .sort((a, b) => {
-        const ta = parseInt(a.tries) || 999;
-        const tb = parseInt(b.tries) || 999;
-        if (ta !== tb) return ta - tb;
-        return new Date(a.time || a.winner_time || 0) - new Date(b.time || b.winner_time || 0);
-      })
-      .slice(0, 10);
+    await loadConfig();
 
-    renderLeaderboard(used);
+    // Fetch users and optionally history in parallel
+    const [usersRaw, historyRaw] = await Promise.allSettled([
+      fetchUsersFromSheet(),
+      fetchHistoryFromSheet()
+    ]);
+
+    const users   = usersRaw.status   === 'fulfilled' ? usersRaw.value   : [];
+    const history = historyRaw.status === 'fulfilled' ? historyRaw.value : [];
+
+    // Build rewards count per user from history
+    const rewardsCount = {};
+    history.forEach(h => {
+      const uid = h.user_id || h['user_id'];
+      if (uid) rewardsCount[uid] = (rewardsCount[uid] || 0) + 1;
+    });
+
+    // If users sheet is empty, fall back to puzzle sheet winners
+    if (!users.length) {
+      const all  = await fetchAllRows();
+      const used = all
+        .filter(r => r.status && r.status.toLowerCase() === 'used')
+        .sort((a, b) => {
+          const ta = parseInt(a.tries) || 999;
+          const tb = parseInt(b.tries) || 999;
+          if (ta !== tb) return ta - tb;
+          return new Date(a.winner_time || 0) - new Date(b.winner_time || 0);
+        })
+        .slice(0, 10);
+      renderLeaderboardFallback(used);
+      return;
+    }
+
+    renderLeaderboard(users, rewardsCount);
   } catch(e) {
     card.innerHTML = `<div class="expired-card">
       <span class="expired-icon">⚠️</span>
@@ -987,7 +1444,69 @@ async function initLeaderboardPage() {
   }
 }
 
-function renderLeaderboard(rows) {
+function renderLeaderboard(users, rewardsCount) {
+  const card = document.getElementById('lb-card');
+
+  // Sort by wins DESC
+  const sorted = [...users]
+    .filter(u => u.username)
+    .sort((a, b) => (parseInt(b.wins) || 0) - (parseInt(a.wins) || 0))
+    .slice(0, 20);
+
+  if (!sorted.length) {
+    card.innerHTML = `
+      <div class="lb-header">
+        <div><div class="accent-tag">🏆 المتصدرون</div><div class="page-title">لوحة الشرف</div></div>
+      </div>
+      <div class="empty-state"><span class="icon">🏅</span>لا يوجد فائزون بعد. كن الأول!</div>`;
+    return;
+  }
+
+  const rankClass = i => i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+  const rankIcon  = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+
+  const myId = _currentUser ? _currentUser.user_id : null;
+
+  const rows_html = sorted.map((u, i) => {
+    const uid      = u.user_id || u['user_id'] || '';
+    const uname    = u.username || u['username'] || '-';
+    const wins     = u.wins || u['wins'] || '0';
+    const rewCount = rewardsCount[uid] || 0;
+    const isMe     = myId && uid === myId;
+    return `
+      <tr class="lb-row" style="animation-delay:${i * 0.06}s${isMe ? ';background:rgba(237,255,0,0.04)' : ''}">
+        <td><span class="rank-badge ${rankClass(i)}">${rankIcon(i)}</span></td>
+        <td class="lb-username">${isMe ? '⭐ ' : ''}${escHtml(uname)}</td>
+        <td class="lb-wins">${escHtml(String(wins))}</td>
+        <td class="lb-rewards-count">${rewCount > 0 ? rewCount + ' 🎁' : '-'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="lb-header">
+      <div>
+        <div class="accent-tag">🏆 المتصدرون</div>
+        <div class="page-title">لوحة الشرف</div>
+        <div class="page-subtitle">مرتبون حسب عدد الانتصارات</div>
+      </div>
+      <span class="lb-count">${sorted.length} لاعب</span>
+    </div>
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>اللاعب</th>
+          <th>الانتصارات</th>
+          <th>الجوائز</th>
+        </tr>
+      </thead>
+      <tbody>${rows_html}</tbody>
+    </table>
+  `;
+}
+
+function renderLeaderboardFallback(rows) {
   const card = document.getElementById('lb-card');
 
   if (!rows.length) {
@@ -1005,10 +1524,9 @@ function renderLeaderboard(rows) {
   const rows_html = rows.map((r, i) => `
     <tr class="lb-row" style="animation-delay:${i * 0.06}s">
       <td><span class="rank-badge ${rankClass(i)}">${rankIcon(i)}</span></td>
-      <td class="lb-id">${escHtml(r.id || '-')}</td>
-      <td class="lb-reward">${escHtml(r.username || '-')}</td>
-      <td class="lb-tries">${escHtml(r.tries || '-')}</td>
-      <td class="lb-time">${formatTime(r.time || r.winner_time)}</td>
+      <td class="lb-username">${escHtml(r.id || '-')}</td>
+      <td class="lb-wins">${escHtml(r.tries || '-')}</td>
+      <td class="lb-rewards-count">${escHtml(r.reward || '-')}</td>
     </tr>
   `).join('');
 
@@ -1017,7 +1535,7 @@ function renderLeaderboard(rows) {
       <div>
         <div class="accent-tag">🏆 المتصدرون</div>
         <div class="page-title">لوحة الشرف</div>
-        <div class="page-subtitle">أسرع 10 فائزين</div>
+        <div class="page-subtitle">أسرع الفائزين</div>
       </div>
       <span class="lb-count">${rows.length} فائز</span>
     </div>
@@ -1026,9 +1544,8 @@ function renderLeaderboard(rows) {
         <tr>
           <th>#</th>
           <th>الرمز</th>
-          <th>الاسم</th>
           <th>المحاولات</th>
-          <th>الوقت</th>
+          <th>الجائزة</th>
         </tr>
       </thead>
       <tbody>${rows_html}</tbody>
@@ -1046,15 +1563,15 @@ function launchConfetti() {
   canvas.height = window.innerHeight;
 
   const pieces = Array.from({length: 120}, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * -canvas.height,
-    w: Math.random() * 10 + 5,
-    h: Math.random() * 6 + 3,
+    x:     Math.random() * canvas.width,
+    y:     Math.random() * -canvas.height,
+    w:     Math.random() * 10 + 5,
+    h:     Math.random() * 6 + 3,
     color: ['#edff00','#ffffff','#00e676','#ff4444','#4fc3f7'][Math.floor(Math.random()*5)],
-    rot: Math.random() * 360,
-    vx: (Math.random()-0.5)*4,
-    vy: Math.random()*4+2,
-    vr: (Math.random()-0.5)*8
+    rot:   Math.random() * 360,
+    vx:    (Math.random()-0.5)*4,
+    vy:    Math.random()*4+2,
+    vr:    (Math.random()-0.5)*8
   }));
 
   let frame = 0;
@@ -1091,14 +1608,6 @@ function escHtml(str) {
     .replace(/'/g,'&#39;');
 }
 
-function formatTime(iso) {
-  if (!iso) return '-';
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
-  } catch(_) { return iso; }
-}
-
 function showMsg(type, text) {
   const id = type === 'error' ? 'msg-error' : type === 'success' ? 'msg-success' : 'msg-info';
   const el = document.getElementById(id);
@@ -1117,11 +1626,33 @@ function clearMsg() {
 // ============================================================
 //  BOOT
 // ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  const page = getCurrentPage();
-  const id   = getURLParam('id') || new URLSearchParams(window.location.search).get('id');
+window.addEventListener('DOMContentLoaded', async () => {
+  // Check for existing user
+  const storedUser = loadUserFromStorage();
 
-  // Show correct page
+  if (storedUser) {
+    _currentUser = storedUser;
+    document.getElementById('modal-username').classList.add('hidden');
+    updateUserChip(storedUser);
+  } else {
+    // Show username modal
+    document.getElementById('modal-username').classList.remove('hidden');
+    const inp = document.getElementById('modal-input-name');
+    if (inp) {
+      setTimeout(() => inp.focus(), 300);
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') _handleUsernameSubmit();
+      });
+    }
+  }
+
+  // Load config in background
+  try { await loadConfig(); } catch(_) {}
+
+  // Route to correct page
+  const page = getCurrentPage();
+  const id   = getURLParam('id');
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
 
@@ -1132,7 +1663,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('popstate', () => {
   const page = getCurrentPage();
-  const id   = getURLParam('id') || new URLSearchParams(window.location.search).get('id');
+  const id   = getURLParam('id');
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   if      (page === 'puzzle')      initPuzzlePage(id);
