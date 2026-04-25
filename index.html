@@ -535,7 +535,7 @@
 (async function () {
 
   /* ════════════════════════════════
-     STATE
+     STATE (ANTI 429 + SAFE MODE)
   ════════════════════════════════ */
   let isRequesting = false;
   let solved = false;
@@ -548,6 +548,8 @@
 
   let row = null;
   let API_BASE = '';
+
+  let isLoadingPuzzle = false;
 
   /* ════════════════════════════════
      DOM
@@ -564,98 +566,140 @@
   const delay = ms => new Promise(r => setTimeout(r, ms));
 
   const normalize = str =>
-    str.replace(/\s+/g, '')
-       .replace(/[أإآ]/g, 'ا')
-       .replace(/ة/g, 'ه')
-       .toLowerCase()
-       .trim();
+    (str || '')
+      .replace(/\s+/g, '')
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .toLowerCase()
+      .trim();
 
   function setFeedback(msg) {
     feedback.textContent = msg;
+    feedback.style.display = 'block';
+  }
+
+  function clearFeedback() {
+    feedback.textContent = '';
+    feedback.style.display = 'none';
+  }
+
+  function showScreen(id) {
+    ['screen-loading','screen-puzzle','screen-success','screen-exhausted','screen-error']
+      .forEach(s => $(s).style.display = (s === id ? 'block' : 'none'));
   }
 
   /* ════════════════════════════════
-     FETCH WITH RETRY
+     SAFE FETCH (ANTI 429)
   ════════════════════════════════ */
   async function fetchSafe(url, options = {}, retry = 3) {
     try {
       const res = await fetch(url, options);
 
-      if (res.status === 429) {
-        if (retry <= 0) throw "Rate limit";
-        await delay(RETRY_DELAY);
-        return fetchSafe(url, options, retry - 1);
+      if (!res.ok) {
+        if (res.status === 429 && retry > 0) {
+          setFeedback("سيرفر مشغول... إعادة المحاولة");
+          await delay(RETRY_DELAY);
+          return fetchSafe(url, options, retry - 1);
+        }
+        throw new Error("HTTP " + res.status);
       }
 
       return res;
 
     } catch (e) {
       console.error(e);
+      return null;
     }
   }
 
   /* ════════════════════════════════
-     LOAD CONFIG
+     CONFIG
   ════════════════════════════════ */
   const CONFIG_URL = "https://raw.githubusercontent.com/xuxbcnc/rkn/709f49d880db82a65f920ced1a8a076d54a6047f/Config_v12.json";
 
   async function loadConfig() {
     const res = await fetchSafe(CONFIG_URL);
+    if (!res) return;
     const cfg = await res.json();
     API_BASE = atob(cfg.a);
   }
 
   /* ════════════════════════════════
-     LOAD PUZZLE (WITH CACHE)
+     PUZZLE LOADER (CACHE + LOCK)
   ════════════════════════════════ */
   const params = new URLSearchParams(location.search);
   const puzzleId = params.get("id");
 
   if (!puzzleId) {
-    alert("Missing ID");
+    showScreen("screen-error");
     return;
   }
 
   async function loadPuzzle() {
 
-    const cacheKey = "puzzle_" + puzzleId;
-    const cached = localStorage.getItem(cacheKey);
+    if (isLoadingPuzzle) return;
+    isLoadingPuzzle = true;
 
-    if (cached) {
+    const cacheKey = "puzzle_" + puzzleId;
+    const cacheTimeKey = cacheKey + "_time";
+
+    const cached = localStorage.getItem(cacheKey);
+    const cacheTime = localStorage.getItem(cacheTimeKey);
+
+    const CACHE_LIMIT = 60 * 1000; // 1 minute
+
+    if (cached && cacheTime && (Date.now() - cacheTime < CACHE_LIMIT)) {
       row = JSON.parse(cached);
+      isLoadingPuzzle = false;
       return;
     }
 
-    const res = await fetchSafe(`${API_BASE}/search?id=${puzzleId}`);
+    const res = await fetchSafe(`${API_BASE}/search?id=${encodeURIComponent(puzzleId)}`);
+
+    if (!res) {
+      showScreen("screen-error");
+      isLoadingPuzzle = false;
+      return;
+    }
+
     const data = await res.json();
 
-    row = data[0];
+    row = data?.[0];
 
-    localStorage.setItem(cacheKey, JSON.stringify(row));
+    if (row) {
+      localStorage.setItem(cacheKey, JSON.stringify(row));
+      localStorage.setItem(cacheTimeKey, Date.now());
+    }
+
+    isLoadingPuzzle = false;
   }
 
   /* ════════════════════════════════
      INIT
   ════════════════════════════════ */
+  showScreen("screen-loading");
+
   await loadConfig();
   await loadPuzzle();
 
   if (!row) {
-    alert("Puzzle not found");
+    showScreen("screen-error");
     return;
   }
 
   if (row.status === "Used") {
-    alert("Already used");
+    showScreen("screen-error");
     return;
   }
 
-  $('riddle-text').textContent = row.riddle;
+  $('riddle-text').textContent = row.riddle || "—";
 
-  const correct = row.answer;
+  const correct = row.answer || '';
+
+  showScreen("screen-puzzle");
 
   /* ════════════════════════════════
-     SUBMIT
+     SUBMIT LOGIC
   ════════════════════════════════ */
   async function submit() {
 
@@ -675,31 +719,28 @@
 
       solved = true;
 
-      try {
-        await fetchSafe(`${API_BASE}/id/${puzzleId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            status: "Used",
-            tries: tries,
-            winner_time: new Date().toISOString()
-          })
-        });
-      } catch {}
+      await fetchSafe(`${API_BASE}/id/${puzzleId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "Used",
+          tries: tries,
+          winner_time: new Date().toISOString()
+        })
+      });
 
-      // ✅ عرض الجائزة من الشيت
       $('reward-display').textContent = row.reward || "No Reward";
 
-      alert("🎉 مبروك كسبت!");
+      showScreen("screen-success");
 
     } else {
 
       if (tries >= MAX_TRIES) {
-        alert("انتهت المحاولات");
+        showScreen("screen-exhausted");
         return;
       }
 
-      setFeedback("غلط حاول تاني");
+      setFeedback("❌ إجابة خاطئة");
 
       await delay(COOLDOWN);
 
@@ -714,12 +755,10 @@
   btn.addEventListener("click", submit);
 
   input.addEventListener("keydown", e => {
-  if (e.key === "Enter") submit();
-});
+    if (e.key === "Enter") submit();
+  });
 
 })();
-
-
 </script>
 </body>
 </html>
