@@ -1,93 +1,148 @@
-(function() {
-    // منع الكليك يمين عشان نصعب المهمة على الفضوليين
-    document.addEventListener('contextmenu', e => e.preventDefault());
+(async function () {
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        let _cfg = null;
-        let _ans = "";
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const codeId = urlParams.get('id');
+let _ansHash = "";
+let _secrets = null;
+let _locked = false;
+let _tries = 0;
 
-        // دالة تنظيف النصوص (عشان العربي والهمزات)
-        const clean = (t) => t ? t.toString().trim().replace(/^ال/, "").replace(/[ة]/g, "ه").replace(/[أإآ]/g, "ا").replace(/\s+/g, "") : "";
+const MAX_TRIES = 5;
 
-        async function init() {
-            if (!codeId) {
-                document.getElementById('loading').innerText = "CODE MISSING";
-                return;
-            }
+const codeId = new URLSearchParams(window.location.search).get('id');
 
-            try {
-                // 1. سحب ملف الأسرار (C كابيتال زي جيت هاب)
-                const response = await fetch('Config_v12.json');
-                if (!response.ok) throw new Error();
-                _cfg = await response.json();
+const el = (id) => document.getElementById(id);
 
-                // 2. فك تشفير الرابط واستخدامه (atob)
-                const apiUrl = atob(_cfg.a);
-                const r = await fetch(`${apiUrl}/search?id=${codeId}`);
-                const d = await r.json();
-                
-                if (d && d.length > 0 && d[0].status === "Active") {
-                    _ans = d[0].answer;
-                    document.getElementById('riddle-text').innerText = d[0].riddle;
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('content').classList.remove('hidden');
-                } else {
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('error-msg').classList.remove('hidden');
-                }
-            } catch (e) {
-                document.getElementById('loading').innerText = "ERROR: System Update..";
-            }
+const clean = (t) =>
+  t ? t.trim().replace(/^ال/, "")
+  .replace(/[ة]/g, "ه")
+  .replace(/[أإآ]/g, "ا")
+  .replace(/\s+/g, "") : "";
+
+// 🔐 hash للإجابة
+const hash = async (text) => {
+    const enc = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// 🔐 nonce بسيط لكل session
+const nonce = Math.random().toString(36).substring(2);
+
+async function init() {
+
+    if (!codeId) {
+        el('loading').innerText = "INVALID";
+        return;
+    }
+
+    try {
+        const config = await fetch('config_v12.json');
+        _secrets = await config.json();
+
+        const res = await fetch(`${atob(_secrets.a)}/search?id=${codeId}`);
+        const data = await res.json();
+
+        if (!data || data[0]?.status !== "Active") {
+            el('loading').innerText = "INVALID";
+            return;
         }
 
-        // 3. مراقبة زرار الإرسال
-        const btn = document.getElementById('submit-btn');
-        if (btn) {
-            btn.addEventListener('click', async () => {
-                const val = document.getElementById('user-answer').value;
-                
-                if (clean(val) === clean(_ans)) {
-                    try {
-                        const apiUrl = atob(_cfg.a);
-                        const phone = atob(_cfg.w);
-                        
-                        // تحديث الحالة لـ Used
-                        await fetch(`${apiUrl}/id/${codeId}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ "status": "Used" })
-                        });
+        el('riddle-text').innerText = data[0].riddle;
 
-                        // إظهار رسالة النجاح والواتساب
-                        document.getElementById('content').classList.add('hidden');
-                        document.getElementById('success-msg').classList.remove('hidden');
-                        
-                        const msg = encodeURIComponent(`أنا حليت فزورة القطعة رقم #${codeId}`);
-                        const waLink = `https://wa.me/${phone}?text=${msg}`;
+        // نخزن hash بس
+        _ansHash = await hash(clean(data[0].answer));
 
-                        document.getElementById('success-msg').innerHTML = `
-                            <h1 style="color:#fff; letter-spacing:3px;">SUCCESS</h1>
-                            <div style="background:#222; padding:15px; border-radius:8px; margin:20px 0;">
-                                <p style="color:#888; font-size:12px; margin:0;">SERIAL ID</p>
-                                <h2 style="color:#fff; margin:5px 0;">#${codeId}</h2>
-                            </div>
-                            <p>صور الشاشة وابعتها هنا عشان تستلم الهدية:</p>
-                            <a href="${waLink}" target="_blank" class="btn-contact" style="background:#25d366; color:#white; padding:12px 25px; border-radius:50px; text-decoration:none; display:inline-block; margin-top:10px;">
-                                WhatsApp
-                            </a>
-                        `;
-                    } catch (err) {
-                        alert("صح! صور الشاشة وكلمنا.");
-                    }
-                } else {
-                    alert("الإجابة غلط، فكر تاني!");
-                }
+        el('loading').classList.add('hidden');
+        el('content').classList.remove('hidden');
+
+    } catch (e) {
+        el('loading').innerText = "ERROR";
+    }
+}
+
+async function handleSubmit() {
+
+    if (_locked) return;
+
+    const val = clean(el('user-answer').value);
+    const msg = el('msg');
+
+    if (!val) return;
+
+    if (_tries >= MAX_TRIES) {
+        msg.className = "msg error";
+        msg.innerText = "Too many attempts";
+        return;
+    }
+
+    _tries++;
+
+    el('submit-btn').disabled = true;
+    msg.className = "msg";
+    msg.innerText = "Checking...";
+
+    await new Promise(r => setTimeout(r, 700));
+
+    const userHash = await hash(val + nonce);
+    const correctHash = await hash(clean(val) === "" ? "" : clean(val) + nonce);
+
+    // مقارنة ذكية
+    if (await hash(val) === _ansHash) {
+
+        msg.className = "msg success";
+        msg.innerText = "Correct ✔";
+
+        _locked = true;
+
+        try {
+            await fetch(`${atob(_secrets.a)}/id/${codeId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: "Used",
+                    nonce: nonce,
+                    tries: _tries
+                })
             });
-        }
+        } catch {}
 
-        init();
-    });
+        showSuccess();
+
+    } else {
+
+        msg.className = "msg error";
+        msg.innerText = "Wrong answer";
+
+        el('user-answer').classList.add('shake');
+        setTimeout(() => el('user-answer').classList.remove('shake'), 300);
+
+        el('submit-btn').disabled = false;
+    }
+}
+
+function showSuccess() {
+
+    const wa = atob(_secrets.w);
+    const msg = encodeURIComponent(`أنا حليت فزورة القطعة رقم #${codeId}`);
+
+    el('content').classList.add('hidden');
+
+    el('success').innerHTML = `
+        <h1>SUCCESS</h1>
+        <div class="serial-tag">
+            <p style="color:#444;font-size:0.6rem">SERIAL ID</p>
+            <h3>#${codeId}</h3>
+        </div>
+        <a href="https://wa.me/${wa}?text=${msg}" target="_blank" class="btn-contact">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+        </a>
+    `;
+
+    el('success').classList.remove('hidden');
+}
+
+el('submit-btn').addEventListener('click', handleSubmit);
+
+init();
+
 })();
