@@ -1,86 +1,125 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>RKN PUZZLE</title>
-<style>
-body{
-  background:#0d0d0d;
-  color:#fff;
-  font-family:Arial;
-  text-align:center;
-  padding:40px;
-}
-.card{
-  background:#111;
-  padding:20px;
-  border-radius:12px;
-  max-width:500px;
-  margin:auto;
-}
-input{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-}
-button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:yellow;
-  border:none;
-  cursor:pointer;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUKN | اللغز</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #edff00; --bg: #0a0a0a; --card: #141414; }
+        body { margin:0; font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 450px; text-align: center; }
+        .card { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: var(--accent); font-weight: 900; margin-top: 0; }
+        #riddle-box { background: #000; padding: 20px; border-radius: 12px; margin: 20px 0; min-height: 60px; line-height: 1.6; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; text-align: center; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 15px; border-radius: 10px; border: none; background: var(--accent); color: #000; font-weight: 700; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .hidden { display: none; }
+        .success-box { color: #25D366; }
+        .reward-text { font-size: 24px; color: var(--accent); margin: 20px 0; font-weight: 700; }
+        .error { color: #ff4444; font-size: 14px; margin-top: 10px; }
+    </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>🧩 RKN PUZZLE</h2>
+<div class="container">
+    <div id="loading">جاري التحميل...</div>
 
-  <div id="riddle">Loading...</div>
+    <div id="main-card" class="card hidden">
+        <h1>RUKN PUZZLE</h1>
+        <div id="riddle-box"></div>
+        <input type="text" id="answer-input" placeholder="اكتب إجابتك هنا...">
+        <div id="error-msg" class="error hidden">إجابة غير صحيحة، حاول مجدداً!</div>
+        <button id="submit-btn">إرسال الإجابة</button>
+    </div>
 
-  <input id="answer" placeholder="اكتب الإجابة">
-  <button onclick="check()">تحقق</button>
-
-  <p id="msg"></p>
+    <div id="reward-card" class="card hidden">
+        <div class="success-box">
+            <h2 style="margin-top:0">مبروك يا بطل! 🎉</h2>
+            <p>لقد حليت اللغز بنجاح وجايزتك هي:</p>
+            <div id="reward-display" class="reward-text"></div>
+            <p style="font-size: 14px; opacity: 0.8;">اضغط الزر بالأسفل لاستلامها عبر واتساب</p>
+            <button id="wa-btn" style="background: #25D366; color: white;">استلام الجائزة 💬</button>
+        </div>
+    </div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbw_x-_WNsCpmxZ3tFF45mWaYHEvZL8lKaMk2U-m9vsZGlZaClXaUKifO7rcS5knIeyt9g/exec";
-const id = new URLSearchParams(location.search).get("id");
+    // الإعدادات - عدل الرابط والواتساب هنا فقط
+    const API_BASE = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
+    const WA_NUMBER = "201014605912"; // حط رقمك هنا
 
-let correctAnswer = "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeId = urlParams.get('id');
+    let currentPuzzle = null;
 
-async function load(){
-  const res = await fetch(API + "?id=" + id);
-  const data = await res.json();
+    // تنظيف الحروف
+    const clean = (t) => t ? t.toString().trim().replace(/^ال/, "").replace(/[ة]/g, "ه").replace(/[أإآ]/g, "ا").replace(/\s+/g, "").toLowerCase() : "";
 
-  document.getElementById("riddle").innerText = data.riddle;
-  correctAnswer = data.answer;
-}
+    async function init() {
+        if (!codeId) {
+            document.getElementById('loading').innerText = "❌ كود القطعة ناقص";
+            return;
+        }
 
-async function check(){
-  let user = document.getElementById("answer").value.trim();
+        try {
+            const r = await fetch(API_BASE);
+            const data = await r.json();
+            currentPuzzle = data.find(x => x.id == codeId);
 
-  if(user === correctAnswer){
-    document.getElementById("msg").innerText = "🎉 صح!";
+            if (currentPuzzle && currentPuzzle.status === "Active") {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('main-card').classList.remove('hidden');
+                document.getElementById('riddle-box').innerText = currentPuzzle.riddle;
+            } else {
+                document.getElementById('loading').innerText = "❌ هذه القطعة مستخدمة أو غير موجودة";
+            }
+        } catch (e) {
+            document.getElementById('loading').innerText = "⚠️ عطل مؤقت.. حاول بعد قليل";
+        }
+    }
 
-    await fetch(API, {
-      method:"POST",
-      body: JSON.stringify({
-        id: id,
-        action: "win"
-      })
-    });
+    document.getElementById('submit-btn').onclick = async () => {
+        const val = document.getElementById('answer-input').value;
+        const btn = document.getElementById('submit-btn');
+        const err = document.getElementById('error-msg');
 
-  } else {
-    document.getElementById("msg").innerText = "❌ غلط";
-  }
-}
+        if (clean(val) === clean(currentPuzzle.answer)) {
+            btn.innerText = "جاري الحفظ...";
+            btn.disabled = true;
 
-load();
+            try {
+                // تسجيل النجاح في الشيت
+                await fetch(`${API_BASE}/id/${codeId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        "status": "Used", 
+                        "time": new Date().toLocaleString('ar-EG') 
+                    })
+                });
+
+                // إظهار صفحة الجايزة
+                document.getElementById('main-card').classList.add('hidden');
+                document.getElementById('reward-card').classList.remove('hidden');
+                document.getElementById('reward-display').innerText = currentPuzzle.reward || "جايزة مميزة";
+
+                document.getElementById('wa-btn').onclick = () => {
+                    const msg = encodeURIComponent(`أهلاً RUKN، لقد حليت اللغز رقم #${codeId} وجايزتي هي: ${currentPuzzle.reward}`);
+                    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+                };
+
+            } catch (e) {
+                alert("تم الحل! لكن فشل الاتصال بالسيرفر. صور الشاشة وكلمنا.");
+            }
+        } else {
+            err.classList.remove('hidden');
+            setTimeout(() => err.classList.add('hidden'), 3000);
+        }
+    };
+
+    init();
 </script>
-
 </body>
 </html>
