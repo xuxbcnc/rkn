@@ -17,16 +17,12 @@ const clean = (t) =>
   .replace(/[أإآ]/g, "ا")
   .replace(/\s+/g, "") : "";
 
-// 🔐 hash للإجابة
 const hash = async (text) => {
     const enc = new TextEncoder().encode(text);
     const buf = await crypto.subtle.digest("SHA-256", enc);
     return Array.from(new Uint8Array(buf))
         .map(b => b.toString(16).padStart(2, '0')).join('');
 };
-
-// 🔐 nonce بسيط لكل session
-const nonce = Math.random().toString(36).substring(2);
 
 async function init() {
 
@@ -36,10 +32,14 @@ async function init() {
     }
 
     try {
-        const config = await fetch('config_v12.json');
-        _secrets = await config.json();
+        // ✅ تحميل من GitHub RAW
+        const configRes = await fetch('https://raw.githubusercontent.com/xuxbcnc/rkn/709f49d880db82a65f920ced1a8a076d54a6047f/Config_v12.json');
 
-        const res = await fetch(`${atob(_secrets.a)}/search?id=${codeId}`);
+        _secrets = await configRes.json();
+
+        const apiUrl = atob(_secrets.a);
+
+        const res = await fetch(`${apiUrl}/search?id=${codeId}`);
         const data = await res.json();
 
         if (!data || data[0]?.status !== "Active") {
@@ -49,7 +49,6 @@ async function init() {
 
         el('riddle-text').innerText = data[0].riddle;
 
-        // نخزن hash بس
         _ansHash = await hash(clean(data[0].answer));
 
         el('loading').classList.add('hidden');
@@ -57,6 +56,7 @@ async function init() {
 
     } catch (e) {
         el('loading').innerText = "ERROR";
+        console.error(e);
     }
 }
 
@@ -78,16 +78,13 @@ async function handleSubmit() {
     _tries++;
 
     el('submit-btn').disabled = true;
-    msg.className = "msg";
     msg.innerText = "Checking...";
 
     await new Promise(r => setTimeout(r, 700));
 
-    const userHash = await hash(val + nonce);
-    const correctHash = await hash(clean(val) === "" ? "" : clean(val) + nonce);
+    const userHash = await hash(val);
 
-    // مقارنة ذكية
-    if (await hash(val) === _ansHash) {
+    if (userHash === _ansHash) {
 
         msg.className = "msg success";
         msg.innerText = "Correct ✔";
@@ -98,11 +95,7 @@ async function handleSubmit() {
             await fetch(`${atob(_secrets.a)}/id/${codeId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    status: "Used",
-                    nonce: nonce,
-                    tries: _tries
-                })
+                body: JSON.stringify({ status: "Used" })
             });
         } catch {}
 
@@ -129,10 +122,7 @@ function showSuccess() {
 
     el('success').innerHTML = `
         <h1>SUCCESS</h1>
-        <div class="serial-tag">
-            <p style="color:#444;font-size:0.6rem">SERIAL ID</p>
-            <h3>#${codeId}</h3>
-        </div>
+        <p>#${codeId}</p>
         <a href="https://wa.me/${wa}?text=${msg}" target="_blank" class="btn-contact">
             <i class="fab fa-whatsapp"></i> WhatsApp
         </a>
