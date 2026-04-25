@@ -1,216 +1,156 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RKN Puzzle Lite</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RKN Puzzle</title>
 
 <style>
 body{
   margin:0;
-  font-family:Cairo;
+  font-family: Arial;
   background:#0d0d0d;
   color:#fff;
-}
-
-.container{
-  max-width:600px;
-  margin:60px auto;
-  padding:20px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
 .card{
-  background:#111;
-  padding:25px;
-  border-radius:15px;
+  width:90%;
+  max-width:500px;
+  background:#151515;
+  padding:20px;
+  border-radius:12px;
   border:1px solid #333;
+  text-align:center;
 }
 
-h1{
-  color:#edff00;
-  font-size:22px;
-}
-
-#riddle{
-  margin:15px 0;
-  padding:10px;
-  background:#000;
-  border-radius:10px;
-  min-height:50px;
-}
+h2{color:#edff00}
 
 input{
   width:100%;
   padding:12px;
-  border-radius:10px;
+  margin-top:15px;
+  border-radius:8px;
   border:1px solid #333;
-  background:#000;
+  background:#0d0d0d;
   color:#fff;
 }
 
 button{
   width:100%;
-  margin-top:15px;
   padding:12px;
+  margin-top:10px;
   background:#edff00;
   border:none;
-  border-radius:10px;
   font-weight:bold;
   cursor:pointer;
+  border-radius:8px;
 }
 
 .msg{
   margin-top:10px;
   font-size:14px;
 }
+
+.bad{color:#ff4d4d}
+.good{color:#00e676}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="card">
-    <h1>🧩 RKN Puzzle</h1>
+<div class="card">
+  <h2>🧩 RKN PUZZLE</h2>
 
-    <div id="riddle">جارٍ التحميل...</div>
+  <div id="riddle">Loading...</div>
 
-    <input id="answer" placeholder="اكتب الإجابة"/>
-    <button onclick="check()">تحقق</button>
+  <input id="answer" placeholder="اكتب الإجابة">
+  <button onclick="checkAnswer()">تحقق</button>
 
-    <div class="msg" id="msg"></div>
-  </div>
+  <div class="msg" id="msg"></div>
 </div>
 
 <script>
-const API = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
+const API = "https://script.google.com/macros/s/AKfycbw_x-_WNsCpmxZ3tFF45mWaYHEvZL8lKaMk2U-m9vsZGlZaClXaUKifO7rcS5knIeyt9g/exec";
 
-// =========================
-// CACHE (يحمي من الضغط)
-// =========================
-let CACHE = null;
-let LAST_FETCH = 0;
+let puzzle = null;
 
-// =========================
-// تحميل البيانات مرة واحدة فقط
-// =========================
-async function loadData(){
-  const now = Date.now();
-
-  // cache لمدة 60 ثانية
-  if (CACHE && now - LAST_FETCH < 60000){
-    return CACHE;
-  }
-
-  const res = await fetch(API);
-
-  // مهم جدًا: منع كسر JSON
-  const text = await res.text();
-
-  let json;
-  try{
-    json = JSON.parse(text);
-  }catch(e){
-    throw new Error("API returned invalid response (429 or HTML)");
-  }
-
-  if(!Array.isArray(json)){
-    throw new Error("API did not return array");
-  }
-
-  CACHE = json;
-  LAST_FETCH = now;
-
-  return json;
-}
-
-// =========================
-// جلب ID من الرابط
-// =========================
-function getId(){
-  return new URLSearchParams(location.search).get("id");
-}
-
-// =========================
-// INIT
-// =========================
-async function init(){
-  const id = getId();
+// ================== LOAD PUZZLE ==================
+async function load(){
+  const id = new URLSearchParams(location.search).get("id");
 
   if(!id){
-    document.getElementById("riddle").innerText = "❌ لا يوجد ID في الرابط";
+    document.getElementById("riddle").innerText = "❌ مفيش ID";
     return;
   }
 
   try{
-    const data = await loadData();
+    const res = await fetch(API + "?id=" + id);
+    const data = await res.json();
 
-    const row = data.find(x => x.id == id);
+    // أهم سطر عشان نتفادى أي error
+    puzzle = Array.isArray(data) ? data[0] : data;
 
-    if(!row){
+    if(!puzzle){
       document.getElementById("riddle").innerText = "❌ اللغز غير موجود";
       return;
     }
 
-    window.PUZZLE = row;
-    document.getElementById("riddle").innerText = row.riddle;
-
-  }catch(err){
-    console.error(err);
-    document.getElementById("riddle").innerText =
-      "⚠️ مشكلة في السيرفر أو 429 - حاول بعد دقيقة";
-  }
-}
-
-// =========================
-// CHECK ANSWER
-// =========================
-function normalize(t){
-  return t.trim().replace(/\s+/g,'').toLowerCase();
-}
-
-async function check(){
-  const input = document.getElementById("answer").value;
-  const msg = document.getElementById("msg");
-
-  if(!input){
-    msg.innerText = "اكتب إجابة";
-    return;
-  }
-
-  const row = window.PUZZLE;
-  if(!row){
-    msg.innerText = "لم يتم تحميل اللغز";
-    return;
-  }
-
-  if(normalize(input) === normalize(row.answer)){
-    msg.innerText = "✔ إجابة صحيحة 🎉";
-
-    // تحديث مرة واحدة فقط (بدون ضغط)
-    try{
-      await fetch(`${API}/id/${row.id}`, {
-        method:"PATCH",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body: JSON.stringify({
-          status:"used",
-          winner_time:new Date().toISOString()
-        })
-      });
-    }catch(e){
-      console.log("update failed");
+    if(puzzle.status && puzzle.status.toLowerCase() !== "active"){
+      document.getElementById("riddle").innerText = "🔒 اللغز مستخدم أو مقفول";
+      return;
     }
 
-  }else{
-    msg.innerText = "❌ إجابة خاطئة";
+    document.getElementById("riddle").innerText = puzzle.riddle;
+
+  }catch(e){
+    document.getElementById("riddle").innerText = "❌ خطأ في التحميل";
   }
 }
 
-// تشغيل
-init();
+load();
+
+// ================== CHECK ANSWER ==================
+async function checkAnswer(){
+
+  const user = document.getElementById("answer").value.trim();
+  const msg  = document.getElementById("msg");
+
+  if(!user){
+    msg.innerText = "اكتب إجابة";
+    msg.className = "msg bad";
+    return;
+  }
+
+  try{
+
+    const res = await fetch(API, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        id: puzzle.id,
+        answer: user
+      })
+    });
+
+    const result = await res.json();
+
+    if(result.success){
+      msg.innerText = "🎉 " + result.message;
+      msg.className = "msg good";
+    }else{
+      msg.innerText = "❌ " + result.message;
+      msg.className = "msg bad";
+    }
+
+  }catch(e){
+    msg.innerText = "❌ error";
+    msg.className = "msg bad";
+  }
+}
 </script>
 
 </body>
