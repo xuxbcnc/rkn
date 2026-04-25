@@ -532,286 +532,194 @@
 </div>
 
 <script>
-(async () => {
+((async function () {
 
   /* ════════════════════════════════
-     STATE & FLAGS
+     STATE
   ════════════════════════════════ */
-  let loaded      = false;   // data fetched once
-  let isRequesting= false;   // lock: active HTTP request in progress
-  let solved      = false;   // puzzle solved permanently
-  let tries       = 0;
+  let isRequesting = false;
+  let solved = false;
+  let tries = 0;
   const MAX_TRIES = 5;
-  const SUBMIT_DELAY_MS  = 700;   // min delay before submitting answer
-  const COOLDOWN_MS      = 2500;  // cooldown between wrong attempts
-  const RETRY_429_MS     = 2500;  // auto-retry wait on 429
-  let inCooldown  = false;        // between-attempt cooldown active
-  let row         = null;
-  let API_BASE    = '';
+
+  const SUBMIT_DELAY = 700;
+  const COOLDOWN = 2500;
+  const RETRY_DELAY = 2500;
+
+  let row = null;
+  let API_BASE = '';
 
   /* ════════════════════════════════
-     DOM REFS
+     DOM
   ════════════════════════════════ */
-  const screens = ['screen-loading','screen-puzzle','screen-success','screen-exhausted','screen-error'];
   const $ = id => document.getElementById(id);
 
-  const show = id => screens.forEach(s => $(s).style.display = s === id ? 'block' : 'none');
-
-  const btn       = $('btn-submit');
-  const input     = $('answer-input');
-  const feedback  = $('feedback');
-  const coolWrap  = $('cooldown-wrap');
-  const coolBar   = $('cooldown-bar');
+  const btn = $('btn-submit');
+  const input = $('answer-input');
+  const feedback = $('feedback');
 
   /* ════════════════════════════════
      HELPERS
   ════════════════════════════════ */
   const delay = ms => new Promise(r => setTimeout(r, ms));
 
-  const normalizeAr = str =>
+  const normalize = str =>
     str.replace(/\s+/g, '')
        .replace(/[أإآ]/g, 'ا')
        .replace(/ة/g, 'ه')
        .toLowerCase()
        .trim();
 
-  function buildDots(total = MAX_TRIES, used = 0) {
-    const wrap = $('tries-dots');
-    wrap.innerHTML = '';
-    for (let i = 0; i < total; i++) {
-      const d = document.createElement('span');
-      d.className = 'try-dot' + (i < used ? ' used' : i === used ? ' active' : '');
-      wrap.appendChild(d);
-    }
-  }
-
-  function setFeedback(msg, type = 'error') {
+  function setFeedback(msg) {
     feedback.textContent = msg;
-    feedback.className   = 'feedback ' + type;
-    if (type === 'error') {
-      input.classList.add('shake');
-      setTimeout(() => input.classList.remove('shake'), 550);
-    }
-  }
-
-  function clearFeedback() {
-    feedback.className   = 'feedback';
-    feedback.textContent = '';
-  }
-
-  function showError(msg) {
-    $('error-msg').textContent = msg;
-    show('screen-error');
-  }
-
-  function setButtonLoading(loading) {
-    if (loading) {
-      btn.disabled = true;
-      btn.classList.add('loading');
-      input.disabled = true;
-    } else {
-      btn.classList.remove('loading');
-      // note: btn.disabled re-evaluated by caller
-    }
-  }
-
-  /* Cooldown bar animation between attempts */
-  function startCooldown(ms) {
-    return new Promise(resolve => {
-      inCooldown = true;
-      btn.disabled = true;
-      input.disabled = true;
-      coolWrap.classList.add('visible');
-      coolBar.style.transition = 'none';
-      coolBar.style.width      = '100%';
-      // force reflow
-      coolBar.getBoundingClientRect();
-      coolBar.style.transition = `width ${ms}ms linear`;
-      coolBar.style.width      = '0%';
-      setTimeout(() => {
-        inCooldown = false;
-        btn.disabled   = false;
-        input.disabled = false;
-        coolWrap.classList.remove('visible');
-        resolve();
-      }, ms);
-    });
   }
 
   /* ════════════════════════════════
-     FETCH WITH 429 RETRY
+     FETCH WITH RETRY
   ════════════════════════════════ */
-  async function fetchWithRetry(url, options = {}, attempt = 1) {
-    const res = await fetch(url, options);
-    if (res.status === 429) {
-      if (attempt >= 3) throw Object.assign(new Error('429'), { status: 429 });
-      setFeedback('كثير من الطلبات، يرجى الانتظار...', 'warn');
-      await delay(RETRY_429_MS * attempt);
-      clearFeedback();
-      return fetchWithRetry(url, options, attempt + 1);
+  async function fetchSafe(url, options = {}, retry = 3) {
+    try {
+      const res = await fetch(url, options);
+
+      if (res.status === 429) {
+        if (retry <= 0) throw "Rate limit";
+        await delay(RETRY_DELAY);
+        return fetchSafe(url, options, retry - 1);
+      }
+
+      return res;
+
+    } catch (e) {
+      console.error(e);
     }
-    return res;
   }
 
   /* ════════════════════════════════
-     CONFIG LOAD (once)
+     LOAD CONFIG
   ════════════════════════════════ */
-  const CONFIG_URL = 'https://raw.githubusercontent.com/xuxbcnc/rkn/709f49d880db82a65f920ced1a8a076d54a6047f/Config_v12.json';
+  const CONFIG_URL = "https://raw.githubusercontent.com/xuxbcnc/rkn/709f49d880db82a65f920ced1a8a076d54a6047f/Config_v12.json";
 
   async function loadConfig() {
-    const r = await fetchWithRetry(CONFIG_URL);
-    if (!r.ok) throw new Error('config fetch failed');
-    const cfg = await r.json();
+    const res = await fetchSafe(CONFIG_URL);
+    const cfg = await res.json();
     API_BASE = atob(cfg.a);
   }
 
   /* ════════════════════════════════
-     PUZZLE LOAD (once, guarded)
+     LOAD PUZZLE (WITH CACHE)
   ════════════════════════════════ */
-  const params   = new URLSearchParams(location.search);
-  const puzzleId = params.get('id');
+  const params = new URLSearchParams(location.search);
+  const puzzleId = params.get("id");
 
   if (!puzzleId) {
-    showError('لم يتم تحديد رقم اللغز. أضف ?id=X إلى الرابط.');
+    alert("Missing ID");
     return;
   }
 
-  $('puzzle-id-label').textContent = puzzleId;
-  $('success-id').textContent      = puzzleId;
+  async function loadPuzzle() {
 
-  if (!loaded) {
-    loaded = true;
-    try {
-      await loadConfig();
-      const res  = await fetchWithRetry(`${API_BASE}/search?id=${encodeURIComponent(puzzleId)}`);
-      if (!res.ok) throw new Error('sheet fetch failed');
-      const data = await res.json();
-      if (!data || !data.length) {
-        showError('اللغز رقم ' + puzzleId + ' غير موجود.');
-        return;
-      }
-      row = data[0];
-    } catch (e) {
-      if (e.status === 429) {
-        showError('الخادم مشغول حالياً. يرجى الانتظار دقيقة ثم إعادة تحميل الصفحة.');
-      } else {
-        showError('تعذّر الاتصال بقاعدة البيانات. تحقق من اتصالك وحاول مجدداً.');
-      }
+    const cacheKey = "puzzle_" + puzzleId;
+    const cached = localStorage.getItem(cacheKey);
+
+    if (cached) {
+      row = JSON.parse(cached);
       return;
     }
+
+    const res = await fetchSafe(`${API_BASE}/search?id=${puzzleId}`);
+    const data = await res.json();
+
+    row = data[0];
+
+    localStorage.setItem(cacheKey, JSON.stringify(row));
   }
 
-  /* ── already used ── */
-  if (row.status && row.status.toLowerCase() === 'used') {
-    showError('هذا اللغز تم حله مسبقاً. الرابط لم يعد صالحاً.');
+  /* ════════════════════════════════
+     INIT
+  ════════════════════════════════ */
+  await loadConfig();
+  await loadPuzzle();
+
+  if (!row) {
+    alert("Puzzle not found");
     return;
   }
 
-  /* ── render ── */
-  $('riddle-text').textContent = row.riddle || '';
-  const correctAnswer = row.answer || '';
-
-  buildDots(MAX_TRIES, tries);
-  show('screen-puzzle');
-
-  /* ════════════════════════════════
-     LOCK INPUT PERMANENTLY (after solve)
-  ════════════════════════════════ */
-  function lockPermanently() {
-    solved         = true;
-    btn.disabled   = true;
-    input.disabled = true;
+  if (row.status === "Used") {
+    alert("Already used");
+    return;
   }
 
+  $('riddle-text').textContent = row.riddle;
+
+  const correct = row.answer;
+
   /* ════════════════════════════════
-     SUBMIT HANDLER
+     SUBMIT
   ════════════════════════════════ */
-  async function handleSubmit() {
-    /* Guards: ignore if locked, in request, in cooldown, or solved */
-    if (solved || isRequesting || inCooldown) return;
+  async function submit() {
 
-    const userRaw = input.value;
-    const userAns = normalizeAr(userRaw);
-    const correct = normalizeAr(correctAnswer);
+    if (isRequesting || solved) return;
 
-    if (!userAns) {
-      setFeedback('الرجاء كتابة إجابتك أولاً');
-      return;
-    }
+    const val = normalize(input.value);
+    if (!val) return;
 
-    /* Lock immediately */
     isRequesting = true;
-    setButtonLoading(true);
-    clearFeedback();
+    btn.disabled = true;
 
-    /* Anti-spam delay */
-    await delay(SUBMIT_DELAY_MS);
+    await delay(SUBMIT_DELAY);
 
     tries++;
-    buildDots(MAX_TRIES, tries);
 
-    if (userAns === correct) {
-      /* ── CORRECT ── */
-      lockPermanently();
+    if (val === normalize(correct)) {
+
+      solved = true;
 
       try {
-        await fetchWithRetry(`${API_BASE}/id/${encodeURIComponent(puzzleId)}`, {
-          method:  'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({
-            status:      'Used',
-            tries:       String(tries),
+        await fetchSafe(`${API_BASE}/id/${puzzleId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: "Used",
+            tries: tries,
             winner_time: new Date().toISOString()
           })
         });
-      } catch (_) { /* silent – don't block UX */ }
+      } catch {}
 
-      $('reward-display').textContent = row.reward || '—';
-      const successDiv = $('screen-success');
-      show('screen-success');
-      successDiv.classList.add('success-reveal');
+      // ✅ عرض الجائزة من الشيت
+      $('reward-display').textContent = row.reward || "No Reward";
+
+      alert("🎉 مبروك كسبت!");
 
     } else {
-      /* ── WRONG ── */
-      isRequesting = false;
-      setButtonLoading(false);
 
       if (tries >= MAX_TRIES) {
-        /* update tries in sheet (best-effort, no retry needed) */
-        try {
-          fetch(`${API_BASE}/id/${encodeURIComponent(puzzleId)}`, {
-            method:  'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ tries: String(tries) })
-          }).catch(() => {});
-        } catch (_) {}
-
-        lockPermanently();
-        show('screen-exhausted');
+        alert("انتهت المحاولات");
         return;
       }
 
-      const remaining = MAX_TRIES - tries;
-      setFeedback(
-        `إجابة خاطئة. تبقى لك ${remaining} ${remaining === 1 ? 'محاولة' : 'محاولات'}.`
-      );
+      setFeedback("غلط حاول تاني");
 
-      /* Cooldown period between wrong attempts */
-      await startCooldown(COOLDOWN_MS);
-      clearFeedback();
+      await delay(COOLDOWN);
+
+      btn.disabled = false;
+      isRequesting = false;
     }
-
-    isRequesting = false;
   }
 
-  /* ── Wire events ── */
-  btn.addEventListener('click', handleSubmit);
+  /* ════════════════════════════════
+     EVENTS
+  ════════════════════════════════ */
+  btn.addEventListener("click", submit);
 
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleSubmit();
-  });
+  input.addEventListener("keydown", e => {
+  if (e.key === "Enter") submit();
+});
 
 })();
+
+
 </script>
 </body>
 </html>
