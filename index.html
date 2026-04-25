@@ -3,1124 +3,166 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RKN Secure Puzzle System</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet"/>
+<title>RKN Puzzle Lite</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&display=swap" rel="stylesheet"/>
+
 <style>
-  :root {
-    --bg: #0d0d0d;
-    --bg2: #111111;
-    --bg3: #161616;
-    --accent: #edff00;
-    --accent2: #c8d900;
-    --glass: rgba(237,255,0,0.04);
-    --glass-border: rgba(237,255,0,0.12);
-    --text: #f0f0f0;
-    --text-dim: #888;
-    --danger: #ff4444;
-    --success: #00e676;
-    --radius: 16px;
-    --shadow: 0 8px 40px rgba(237,255,0,0.08);
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(237,255,0,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 60% at 20% 90%, rgba(237,255,0,0.04) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
+body {
+  margin:0;
+  font-family:Cairo;
+  background:#0d0d0d;
+  color:#fff;
+}
 
-  /* GRID BACKGROUND */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(237,255,0,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(237,255,0,0.025) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    z-index: 0;
-  }
+.container {
+  max-width:600px;
+  margin:50px auto;
+  padding:20px;
+}
 
-  /* ---- LAYOUT ---- */
-  #app {
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 20px 16px 60px;
-  }
+.card {
+  background:#111;
+  padding:25px;
+  border-radius:15px;
+  border:1px solid #333;
+}
 
-  /* ---- HEADER ---- */
-  .site-header {
-    width: 100%;
-    max-width: 860px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 0 30px;
-    border-bottom: 1px solid var(--glass-border);
-    margin-bottom: 40px;
-    animation: fadeDown 0.6s ease both;
-  }
-  .logo {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 900;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-shadow: 0 0 20px rgba(237,255,0,0.4);
-  }
-  .logo span { color: var(--text-dim); font-weight: 700; }
-  .nav-links { display: flex; gap: 12px; }
-  .nav-btn {
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    color: var(--text-dim);
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.25s;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .nav-btn:hover, .nav-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(237,255,0,0.05);
-  }
+h1 {
+  color:#edff00;
+  font-size:22px;
+}
 
-  /* ---- PAGES ---- */
-  .page { display: none; width: 100%; max-width: 600px; animation: fadeUp 0.5s ease both; }
-  .page.active { display: block; }
-  .page-wide { max-width: 860px; }
+input {
+  width:100%;
+  padding:12px;
+  margin-top:15px;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#000;
+  color:#fff;
+}
 
-  /* ---- CARD ---- */
-  .card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(237,255,0,0.02) 100%);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
-    padding: 36px 32px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(10px);
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.6;
-  }
+button {
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  background:#edff00;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-  /* ---- HEADINGS ---- */
-  .page-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-    line-height: 1.3;
-  }
-  .page-subtitle {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    margin-bottom: 28px;
-  }
-  .accent-tag {
-    display: inline-block;
-    background: rgba(237,255,0,0.1);
-    color: var(--accent);
-    border: 1px solid rgba(237,255,0,0.25);
-    border-radius: 6px;
-    font-size: 0.75rem;
-    padding: 3px 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-  }
-
-  /* ---- PUZZLE ID BADGE ---- */
-  .id-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(237,255,0,0.08);
-    border: 1px solid rgba(237,255,0,0.2);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 0.85rem;
-    color: var(--accent);
-    margin-bottom: 20px;
-  }
-  .id-badge .dot {
-    width: 7px; height: 7px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 1.5s ease infinite;
-  }
-
-  /* ---- RIDDLE BOX ---- */
-  .riddle-box {
-    background: rgba(237,255,0,0.03);
-    border: 1px solid rgba(237,255,0,0.1);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-    font-size: 1.15rem;
-    line-height: 1.9;
-    color: var(--text);
-    position: relative;
-  }
-  .riddle-box .riddle-icon {
-    font-size: 1.4rem;
-    display: block;
-    margin-bottom: 10px;
-  }
-
-  /* ---- ATTEMPTS ---- */
-  .attempts-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .attempts-label { font-size: 0.82rem; color: var(--text-dim); }
-  .attempts-dots { display: flex; gap: 6px; }
-  .dot-attempt {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--glass-border);
-    border: 1px solid var(--glass-border);
-    transition: background 0.3s;
-  }
-  .dot-attempt.used { background: var(--danger); border-color: var(--danger); }
-  .dot-attempt.remaining { background: var(--accent); border-color: var(--accent); }
-
-  /* ---- INPUT ---- */
-  .input-group { position: relative; margin-bottom: 16px; }
-  .styled-input {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--glass-border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 1rem;
-    font-family: 'Cairo', sans-serif;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.25s, box-shadow 0.25s;
-    text-align: right;
-    direction: rtl;
-  }
-  .styled-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(237,255,0,0.1);
-  }
-  .styled-input::placeholder { color: var(--text-dim); }
-
-  /* ---- BUTTONS ---- */
-  .btn-primary {
-    width: 100%;
-    background: var(--accent);
-    color: #0d0d0d;
-    border: none;
-    border-radius: 10px;
-    padding: 15px;
-    font-size: 1rem;
-    font-family: 'Cairo', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-primary::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0);
-    transition: background 0.2s;
-  }
-  .btn-primary:hover:not(:disabled)::after { background: rgba(255,255,255,0.1); }
-  .btn-primary:active:not(:disabled) { transform: scale(0.98); }
-  .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-  .btn-secondary {
-    width: 100%;
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 1rem;
-    font-family: 'Cairo', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: block;
-    text-align: center;
-    margin-top: 12px;
-  }
-  .btn-secondary:hover { background: rgba(237,255,0,0.06); }
-
-  /* ---- MESSAGES ---- */
-  .msg {
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    display: none;
-    animation: fadeUp 0.3s ease both;
-  }
-  .msg.show { display: block; }
-  .msg-error { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3); color: #ff8080; }
-  .msg-success { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: var(--success); }
-  .msg-info { background: rgba(237,255,0,0.07); border: 1px solid rgba(237,255,0,0.2); color: var(--accent); }
-
-  /* ---- SPINNER ---- */
-  .spinner-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 60px 20px;
-    color: var(--text-dim);
-    font-size: 0.9rem;
-  }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid rgba(237,255,0,0.1);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  /* ---- REWARD PAGE ---- */
-  .reward-hero {
-    text-align: center;
-    padding: 20px 0;
-  }
-  .reward-emoji {
-    font-size: 4rem;
-    display: block;
-    margin-bottom: 16px;
-    animation: bounceIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) both;
-  }
-  .reward-title {
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--accent);
-    margin-bottom: 8px;
-    text-shadow: 0 0 30px rgba(237,255,0,0.3);
-  }
-  .reward-text {
-    font-size: 1.05rem;
-    color: var(--text-dim);
-    margin-bottom: 28px;
-  }
-  .reward-box {
-    background: rgba(237,255,0,0.06);
-    border: 1px solid rgba(237,255,0,0.2);
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 24px;
-    text-align: center;
-  }
-  .reward-box .label { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
-  .reward-value { font-size: 1.4rem; font-weight: 700; color: var(--text); line-height: 1.4; }
-  .id-display {
-    display: inline-block;
-    background: rgba(237,255,0,0.1);
-    border: 1px dashed rgba(237,255,0,0.35);
-    border-radius: 8px;
-    padding: 6px 20px;
-    font-size: 1.1rem;
-    font-family: 'Orbitron', sans-serif;
-    color: var(--accent);
-    letter-spacing: 2px;
-    margin-top: 6px;
-  }
-  .screenshot-tip {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--glass-border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 0.88rem;
-    color: var(--text-dim);
-    text-align: center;
-    margin-top: 16px;
-    line-height: 1.7;
-  }
-  .screenshot-tip strong { color: var(--text); }
-
-  /* ---- LEADERBOARD ---- */
-  .lb-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .lb-count {
-    background: rgba(237,255,0,0.08);
-    border: 1px solid rgba(237,255,0,0.18);
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 0.82rem;
-    color: var(--accent);
-    font-weight: 700;
-  }
-  .lb-table { width: 100%; border-collapse: collapse; }
-  .lb-table th {
-    padding: 12px 14px;
-    text-align: right;
-    font-size: 0.78rem;
-    color: var(--text-dim);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  .lb-table td {
-    padding: 14px 14px;
-    font-size: 0.9rem;
-    border-bottom: 1px solid rgba(237,255,0,0.05);
-    vertical-align: middle;
-  }
-  .lb-row { animation: slideRight 0.4s ease both; }
-  .lb-row:hover td { background: rgba(237,255,0,0.025); }
-  .rank-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    font-weight: 900;
-    font-size: 0.85rem;
-  }
-  .rank-1 { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
-  .rank-2 { background: rgba(192,192,192,0.12); color: #c0c0c0; border: 1px solid rgba(192,192,192,0.25); }
-  .rank-3 { background: rgba(205,127,50,0.12); color: #cd7f32; border: 1px solid rgba(205,127,50,0.25); }
-  .rank-other { background: var(--glass); color: var(--text-dim); border: 1px solid var(--glass-border); }
-  .lb-id { color: var(--accent); font-family: 'Orbitron', sans-serif; font-size: 0.78rem; letter-spacing: 1px; }
-  .lb-tries { color: var(--text); font-weight: 700; }
-  .lb-time { color: var(--text-dim); font-size: 0.78rem; direction: ltr; text-align: left; }
-  .lb-reward { color: var(--text); font-size: 0.9rem; }
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-  }
-  .empty-state .icon { font-size: 3rem; display: block; margin-bottom: 14px; }
-
-  /* ---- EXPIRED ---- */
-  .expired-card {
-    text-align: center;
-    padding: 50px 30px;
-  }
-  .expired-icon { font-size: 3.5rem; margin-bottom: 18px; display: block; }
-  .expired-title { font-size: 1.5rem; font-weight: 700; color: var(--danger); margin-bottom: 10px; }
-  .expired-text { color: var(--text-dim); line-height: 1.8; }
-
-  /* ---- ANIMATIONS ---- */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes pulse {
-    0%,100% { opacity:1; transform: scale(1); }
-    50%      { opacity:0.5; transform: scale(0.7); }
-  }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    15%     { transform: translateX(-8px); }
-    30%     { transform: translateX(8px); }
-    45%     { transform: translateX(-5px); }
-    60%     { transform: translateX(5px); }
-    75%     { transform: translateX(-3px); }
-    90%     { transform: translateX(3px); }
-  }
-  @keyframes bounceIn {
-    0%   { opacity: 0; transform: scale(0.3); }
-    50%  { opacity: 1; transform: scale(1.1); }
-    70%  { transform: scale(0.9); }
-    100% { transform: scale(1); }
-  }
-  @keyframes slideRight {
-    from { opacity: 0; transform: translateX(16px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes glow {
-    0%,100% { box-shadow: 0 0 20px rgba(237,255,0,0.15); }
-    50%      { box-shadow: 0 0 40px rgba(237,255,0,0.35); }
-  }
-  .shake { animation: shake 0.5s ease both; }
-  .glow-loop { animation: glow 2.5s ease infinite; }
-
-  /* ---- RESPONSIVE ---- */
-  @media(max-width: 600px) {
-    .card { padding: 24px 18px; }
-    .site-header { flex-direction: column; gap: 14px; align-items: flex-start; }
-    .lb-table th:nth-child(4), .lb-table td:nth-child(4) { display: none; }
-  }
-
-  /* ---- CONFETTI ---- */
-  #confetti-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 999;
-  }
+.msg {
+  margin-top:10px;
+  font-size:14px;
+}
 </style>
 </head>
+
 <body>
-<canvas id="confetti-canvas"></canvas>
-<div id="app">
-  <header class="site-header">
-    <div class="logo">RKN<span> PUZZLE</span></div>
-    <nav class="nav-links">
-      <button class="nav-btn" onclick="navigateTo('puzzle')">اللغز</button>
-      <button class="nav-btn" onclick="navigateTo('leaderboard')">المتصدرون</button>
-    </nav>
-  </header>
 
-  <!-- PUZZLE PAGE -->
-  <div class="page active" id="page-puzzle">
-    <div class="card" id="puzzle-card">
-      <div class="spinner-wrap">
-        <div class="spinner"></div>
-        <span>جارٍ التحميل...</span>
-      </div>
-    </div>
-  </div>
+<div class="container">
+  <div class="card">
+    <h1>🧩 RKN Puzzle</h1>
 
-  <!-- REWARD PAGE -->
-  <div class="page" id="page-reward">
-    <div class="card" id="reward-card">
-      <div class="spinner-wrap">
-        <div class="spinner"></div>
-        <span>جارٍ التحقق...</span>
-      </div>
-    </div>
-  </div>
+    <div id="riddle">جارٍ التحميل...</div>
 
-  <!-- LEADERBOARD PAGE -->
-  <div class="page page-wide" id="page-leaderboard">
-    <div class="card" id="lb-card">
-      <div class="spinner-wrap">
-        <div class="spinner"></div>
-        <span>جارٍ تحميل البيانات...</span>
-      </div>
-    </div>
+    <input id="answer" placeholder="اكتب الإجابة"/>
+    <button onclick="check()">تحقق</button>
+
+    <div class="msg" id="msg"></div>
   </div>
 </div>
 
 <script>
-// ============================================================
-//  CORE CONFIG & SECURITY
-// ============================================================
-const _cfg = Object.freeze({
-  _a: "aHR0cHM6Ly9zaGVldGRiLmlvL2FwaS92MS9rMnNnNmZpb2h2enJz",
-  _w: "MjAxMDU1OTU5MDI1"
-});
-const getApiBase = () => atob(_cfg._a);
-const getWa     = () => atob(_cfg._w);
+const API = "https://sheetdb.io/api/v1/k2sg6fiohvzrs";
 
-// Anti-tamper IIFE for security context
-const SEC = (() => {
-  let _locked    = false;
-  let _attempts  = 0;
-  let _lastTime  = 0;
-  let _success   = false;
-  const MAX_TRIES = 5;
-  const DELAY_MS  = 700;
+let CACHE = null;
 
-  return {
-    canAttempt() {
-      if (_locked || _success) return false;
-      if (_attempts >= MAX_TRIES) { _locked = true; return false; }
-      const now = Date.now();
-      if (now - _lastTime < DELAY_MS) return false;
-      _lastTime = now;
-      return true;
-    },
-    recordAttempt() { _attempts++; return _attempts; },
-    markSuccess()   { _success = true; _locked = true; },
-    isLocked()      { return _locked; },
-    hasSucceeded()  { return _success; },
-    remaining()     { return Math.max(0, MAX_TRIES - _attempts); },
-    attempts()      { return _attempts; }
-  };
-})();
+// تحميل مرة واحدة فقط
+async function loadData() {
+  if (CACHE) return CACHE;
 
-// Block devtools-based function inspection
-(function antiDevtools() {
-  try {
-    Object.defineProperty(window, 'verify', { get: ()=>null, set: ()=>{} });
-    Object.defineProperty(window, 'submit', { get: ()=>null, set: ()=>{} });
-    Object.defineProperty(window, 'checkAnswer', { get: ()=>null, set: ()=>{} });
-  } catch(_) {}
-})();
-
-// ============================================================
-//  SHA-256 (Pure JS, no external dep)
-// ============================================================
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// ============================================================
-//  ARABIC NORMALIZATION
-// ============================================================
-function normalizeArabic(str) {
-  return str
-    .trim()
-    .replace(/\s+/g, '')
-    .replace(/[أإآ]/g, 'ا')
-    .replace(/ة/g, 'ه')
-    .replace(/ى/g, 'ي')
-    .toLowerCase();
-}
-
-// ============================================================
-//  ROUTER
-// ============================================================
-function getCurrentPage() {
-  const hash = window.location.hash;
-  if (hash.startsWith('#reward')) return 'reward';
-  if (hash.startsWith('#leaderboard')) return 'leaderboard';
-  return 'puzzle';
-}
-
-function getURLParam(key) {
-  // Support both ?id=xx and #reward?id=xx
-  const search = window.location.search || window.location.hash.split('?')[1] || '';
-  const p = new URLSearchParams(search.startsWith('?') ? search : '?' + search);
-  return p.get(key);
-}
-
-function navigateTo(page, id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-
-  let hash = '#' + page;
-  if (id) hash += '?id=' + id;
-  window.history.pushState({}, '', hash);
-
-  if      (page === 'puzzle')      initPuzzlePage(id || getURLParam('id'));
-  else if (page === 'reward')      initRewardPage(id || getURLParam('id'));
-  else if (page === 'leaderboard') initLeaderboardPage();
-}
-
-// ============================================================
-//  API HELPERS
-// ============================================================
-async function fetchAllRows() {
-  const r = await fetch(getApiBase());
-  if (!r.ok) throw new Error('Network error');
-  return r.json();
-}
-
-async function fetchRowById(id) {
-  const r = await fetch(`${getApiBase()}/search?id=${encodeURIComponent(id)}`);
-  if (!r.ok) throw new Error('Network error');
-  const data = await r.json();
-  if (!data || !data.length) throw new Error('not_found');
-  return data[0];
-}
-
-async function getUserIP() {
-  try {
-    const r = await fetch('https://api.ipify.org?format=json');
-    const d = await r.json();
-    return d.ip || 'unknown';
-  } catch(_) { return 'unknown'; }
-}
-
-async function patchRow(id, payload) {
-  const r = await fetch(`${getApiBase()}/id/${encodeURIComponent(id)}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  if (!r.ok) throw new Error('Patch failed');
-  return r.json();
-}
-
-// ============================================================
-//  PUZZLE PAGE
-// ============================================================
-let _puzzleRow = null;
-
-async function initPuzzlePage(id) {
-  const card = document.getElementById('puzzle-card');
-
-  // Check if this is a direct URL load (search params)
-  const queryId = new URLSearchParams(window.location.search).get('id');
-  const finalId = id || queryId;
-
-  if (!finalId) {
-    card.innerHTML = `<div class="expired-card">
-      <span class="expired-icon">🔍</span>
-      <div class="expired-title">لا يوجد معرّف</div>
-      <div class="expired-text">يرجى فتح الرابط مع معرّف اللغز (مثال: ?id=123)</div>
-    </div>`;
-    return;
-  }
-
-  card.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><span>جارٍ تحميل اللغز...</span></div>`;
+  const res = await fetch(API);
+  const text = await res.text();
 
   try {
-    const row = await fetchRowById(finalId);
-    _puzzleRow = row;
-
-    if (!row.status || row.status.toLowerCase() !== 'active') {
-      card.innerHTML = `<div class="expired-card">
-        <span class="expired-icon">🔒</span>
-        <div class="expired-title">الرمز منتهي أو مستخدم</div>
-        <div class="expired-text">هذا الكود انتهى صلاحيته أو تم استخدامه بالفعل.<br/>يرجى التواصل مع المشرف للحصول على كود جديد.</div>
-      </div>`;
-      return;
-    }
-
-    renderPuzzleUI(row, finalId);
-  } catch(e) {
-    card.innerHTML = `<div class="expired-card">
-      <span class="expired-icon">⚠️</span>
-      <div class="expired-title">خطأ في التحميل</div>
-      <div class="expired-text">تعذّر تحميل اللغز. تحقق من الاتصال وأعد المحاولة.<br/><small style="opacity:.5">${e.message}</small></div>
-    </div>`;
+    CACHE = JSON.parse(text);
+  } catch {
+    document.getElementById("riddle").innerText = "خطأ في تحميل البيانات";
+    throw new Error("Invalid API response");
   }
+
+  return CACHE;
 }
 
-function renderPuzzleUI(row, id) {
-  const card = document.getElementById('puzzle-card');
-  card.innerHTML = `
-    <div class="accent-tag">🧩 لغز رقم</div>
-    <div class="id-badge"><span class="dot"></span> ${escHtml(id)}</div>
-    <div class="riddle-box">
-      <span class="riddle-icon">❓</span>
-      ${escHtml(row.riddle)}
-    </div>
-    <div class="attempts-row">
-      <span class="attempts-label">المحاولات المتبقية</span>
-      <div class="attempts-dots" id="attempt-dots"></div>
-    </div>
-    <div class="msg msg-error" id="msg-error"></div>
-    <div class="msg msg-success" id="msg-success"></div>
-    <div class="input-group">
-      <input class="styled-input" id="answer-input" type="text" placeholder="أدخل إجابتك هنا..." autocomplete="off" autocorrect="off" spellcheck="false" maxlength="200"/>
-    </div>
-    <button class="btn-primary" id="verify-btn" onclick="_handleVerify('${escHtml(id)}')">
-      ✅ تحقق من الإجابة
-    </button>
-  `;
-  updateDots();
-
-  // Enter key support
-  document.getElementById('answer-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !document.getElementById('verify-btn').disabled) {
-      _handleVerify(id);
-    }
-  });
+// جلب لغز واحد (id من الرابط)
+function getId() {
+  const p = new URLSearchParams(location.search);
+  return p.get("id");
 }
 
-function updateDots() {
-  const dotsEl = document.getElementById('attempt-dots');
-  if (!dotsEl) return;
-  const MAX = 5;
-  const used = 5 - SEC.remaining();
-  dotsEl.innerHTML = '';
-  for (let i = 0; i < MAX; i++) {
-    const d = document.createElement('div');
-    d.className = 'dot-attempt ' + (i < used ? 'used' : 'remaining');
-    dotsEl.appendChild(d);
-  }
-}
-
-// Exposed on window intentionally but guarded internally
-window._handleVerify = async function(id) {
-  if (!SEC.canAttempt()) {
-    if (SEC.isLocked() && !SEC.hasSucceeded()) {
-      showMsg('error', '🚫 تم تجاوز الحد الأقصى للمحاولات. يرجى التواصل مع المشرف.');
-    } else if (SEC.hasSucceeded()) {
-      showMsg('info', '✅ تم إرسال إجابتك بالفعل.');
-    } else {
-      showMsg('error', '⏱ يرجى الانتظار قليلاً قبل المحاولة التالية.');
-    }
-    return;
-  }
-
-  const btn   = document.getElementById('verify-btn');
-  const input = document.getElementById('answer-input');
-  if (!btn || !input) return;
-
-  const userAnswer = input.value;
-  if (!userAnswer.trim()) {
-    showMsg('error', 'يرجى إدخال الإجابة أولاً.');
-    input.classList.add('shake');
-    setTimeout(() => input.classList.remove('shake'), 600);
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '⌛ جارٍ التحقق...';
-  clearMsg();
-
-  SEC.recordAttempt();
-  updateDots();
-
-  // Artificial min-delay for anti-spam
-  const t0 = Date.now();
-
-  try {
-    // Re-fetch row to get live answer (never stored in DOM)
-    const row = await fetchRowById(id);
-
-    const elapsed = Date.now() - t0;
-    if (elapsed < 700) await sleep(700 - elapsed);
-
-    if (!row.answer) throw new Error('no_answer');
-
-    const normalizedUser   = normalizeArabic(userAnswer);
-    const normalizedCorrect = normalizeArabic(row.answer);
-
-    const [hashUser, hashCorrect] = await Promise.all([
-      sha256(normalizedUser),
-      sha256(normalizedCorrect)
-    ]);
-
-    if (hashUser === hashCorrect) {
-      // CORRECT
-      SEC.markSuccess();
-      btn.textContent = '🎉 إجابة صحيحة!';
-      showMsg('success', '🎉 أحسنت! الإجابة صحيحة. جارٍ الانتقال إلى صفحة الجائزة...');
-      input.disabled = true;
-
-      // Update sheet
-      const ip = await getUserIP();
-      await patchRow(id, {
-        status: 'Used',
-        tries:  String(SEC.attempts()),
-        winner_time: new Date().toISOString(),
-        ip: ip
-      });
-
-      // Confetti
-      launchConfetti();
-
-      await sleep(2000);
-      navigateTo('reward', id);
-
-    } else {
-      // WRONG
-      input.classList.add('shake');
-      setTimeout(() => input.classList.remove('shake'), 600);
-
-      const rem = SEC.remaining();
-      if (rem <= 0) {
-        showMsg('error', '🚫 لقد استنفذت جميع المحاولات. يرجى التواصل مع المشرف.');
-        btn.textContent = 'محظور';
-        input.disabled = true;
-      } else {
-        showMsg('error', `❌ إجابة خاطئة. المحاولات المتبقية: ${rem}`);
-        btn.disabled = false;
-        btn.textContent = '✅ تحقق من الإجابة';
-      }
-    }
-  } catch(e) {
-    showMsg('error', 'حدث خطأ. يرجى المحاولة مرة أخرى.');
-    btn.disabled = false;
-    btn.textContent = '✅ تحقق من الإجابة';
-  }
-};
-
-// ============================================================
-//  REWARD PAGE
-// ============================================================
-async function initRewardPage(id) {
-  const card = document.getElementById('reward-card');
-
+async function init() {
+  const id = getId();
   if (!id) {
-    card.innerHTML = `<div class="expired-card"><span class="expired-icon">🔍</span><div class="expired-title">معرّف غير صالح</div></div>`;
+    document.getElementById("riddle").innerText = "لا يوجد ID في الرابط";
     return;
   }
 
-  card.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><span>جارٍ التحقق من جائزتك...</span></div>`;
+  const data = await loadData();
+  const row = data.find(r => r.id === id);
 
-  try {
-    const row = await fetchRowById(id);
-
-    if (!row.status || row.status.toLowerCase() !== 'used') {
-      card.innerHTML = `<div class="expired-card">
-        <span class="expired-icon">🚫</span>
-        <div class="expired-title">وصول غير مصرح</div>
-        <div class="expired-text">لا يمكن عرض الجائزة إلا بعد الإجابة الصحيحة.</div>
-      </div>`;
-      return;
-    }
-
-    renderRewardUI(row, id);
-    launchConfetti();
-
-  } catch(e) {
-    card.innerHTML = `<div class="expired-card">
-      <span class="expired-icon">⚠️</span>
-      <div class="expired-title">خطأ في التحميل</div>
-      <div class="expired-text">${escHtml(e.message)}</div>
-    </div>`;
+  if (!row) {
+    document.getElementById("riddle").innerText = "اللغز غير موجود";
+    return;
   }
+
+  window.PUZZLE = row;
+  document.getElementById("riddle").innerText = row.riddle;
 }
 
-function renderRewardUI(row, id) {
-  const card = document.getElementById('reward-card');
-  const waNum = getWa();
-  const waLink = `https://wa.me/${waNum}`;
-
-  card.innerHTML = `
-    <div class="reward-hero">
-      <span class="reward-emoji">🎉</span>
-      <div class="reward-title">مبروك!</div>
-      <div class="reward-text">لقد فزت بجائزتك بعد ${escHtml(row.tries || '?')} محاولة</div>
-    </div>
-    <div class="reward-box glow-loop">
-      <div class="label">🎁 جائزتك</div>
-      <div class="reward-value">${escHtml(row.reward || 'لم يتم تحديد الجائزة')}</div>
-    </div>
-    <div class="reward-box">
-      <div class="label">🪪 رمز التحقق</div>
-      <div><span class="id-display">${escHtml(id)}</span></div>
-    </div>
-    <a class="btn-primary" style="text-decoration:none;text-align:center;display:block;margin-bottom:12px;" href="${waLink}" target="_blank" rel="noopener">
-      📲 تواصل عبر واتساب لاستلام الجائزة
-    </a>
-    <a class="btn-secondary" href="https://www.instagram.com" target="_blank" rel="noopener">
-      📸 Instagram
-    </a>
-    <div class="screenshot-tip">
-      📷 <strong>خذ لقطة شاشة لهذه الصفحة</strong><br/>
-      وأرسلها عبر واتساب أو إنستغرام للمطالبة بجائزتك
-    </div>
-  `;
+function normalize(t){
+  return t.trim().replace(/\s+/g,'').toLowerCase();
 }
 
-// ============================================================
-//  LEADERBOARD PAGE
-// ============================================================
-async function initLeaderboardPage() {
-  const card = document.getElementById('lb-card');
-  card.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><span>جارٍ تحميل قائمة المتصدرين...</span></div>`;
+async function check(){
+  const input = document.getElementById("answer").value;
+  const msg = document.getElementById("msg");
 
-  try {
-    const all  = await fetchAllRows();
-    const used = all
-      .filter(r => r.status && r.status.toLowerCase() === 'used')
-      .sort((a, b) => {
-        const ta = parseInt(a.tries) || 999;
-        const tb = parseInt(b.tries) || 999;
-        if (ta !== tb) return ta - tb;
-        return new Date(a.winner_time || 0) - new Date(b.winner_time || 0);
+  if (!input) {
+    msg.innerText = "اكتب إجابة";
+    return;
+  }
+
+  const row = window.PUZZLE;
+  if (!row) return;
+
+  if (normalize(input) === normalize(row.answer)) {
+    msg.innerText = "✔ إجابة صحيحة";
+
+    // تحديث مرة واحدة فقط (بدون ضغط)
+    await fetch(`${API}/id/${row.id}`, {
+      method:"PATCH",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        status:"used",
+        winner_time:new Date().toISOString()
       })
-      .slice(0, 10);
-
-    renderLeaderboard(used);
-  } catch(e) {
-    card.innerHTML = `<div class="expired-card">
-      <span class="expired-icon">⚠️</span>
-      <div class="expired-title">خطأ في التحميل</div>
-      <div class="expired-text">${escHtml(e.message)}</div>
-    </div>`;
-  }
-}
-
-function renderLeaderboard(rows) {
-  const card = document.getElementById('lb-card');
-
-  if (!rows.length) {
-    card.innerHTML = `
-      <div class="lb-header">
-        <div><div class="accent-tag">🏆 المتصدرون</div><div class="page-title">لوحة الشرف</div></div>
-      </div>
-      <div class="empty-state"><span class="icon">🏅</span>لا يوجد فائزون بعد. كن الأول!</div>`;
-    return;
-  }
-
-  const rankClass = i => i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
-  const rankIcon  = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-
-  const rows_html = rows.map((r, i) => `
-    <tr class="lb-row" style="animation-delay:${i * 0.06}s">
-      <td><span class="rank-badge ${rankClass(i)}">${rankIcon(i)}</span></td>
-      <td class="lb-id">${escHtml(r.id || '-')}</td>
-      <td class="lb-reward">${escHtml(r.reward || '-')}</td>
-      <td class="lb-tries">${escHtml(r.tries || '-')}</td>
-      <td class="lb-time">${formatTime(r.winner_time)}</td>
-    </tr>
-  `).join('');
-
-  card.innerHTML = `
-    <div class="lb-header">
-      <div>
-        <div class="accent-tag">🏆 المتصدرون</div>
-        <div class="page-title">لوحة الشرف</div>
-        <div class="page-subtitle">أسرع 10 فائزين</div>
-      </div>
-      <span class="lb-count">${rows.length} فائز</span>
-    </div>
-    <table class="lb-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>الرمز</th>
-          <th>الجائزة</th>
-          <th>المحاولات</th>
-          <th>الوقت</th>
-        </tr>
-      </thead>
-      <tbody>${rows_html}</tbody>
-    </table>
-  `;
-}
-
-// ============================================================
-//  CONFETTI
-// ============================================================
-function launchConfetti() {
-  const canvas = document.getElementById('confetti-canvas');
-  const ctx    = canvas.getContext('2d');
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  const pieces = Array.from({length: 120}, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * -canvas.height,
-    w: Math.random() * 10 + 5,
-    h: Math.random() * 6 + 3,
-    color: ['#edff00','#ffffff','#00e676','#ff4444','#4fc3f7'][Math.floor(Math.random()*5)],
-    rot: Math.random() * 360,
-    vx: (Math.random()-0.5)*4,
-    vy: Math.random()*4+2,
-    vr: (Math.random()-0.5)*8
-  }));
-
-  let frame = 0;
-  function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    pieces.forEach(p => {
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot * Math.PI / 180);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-      ctx.restore();
-      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
     });
-    frame++;
-    if (frame < 160) requestAnimationFrame(draw);
-    else ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    setTimeout(()=>{
+      alert("مبروك 🎉");
+    },800);
+
+  } else {
+    msg.innerText = "❌ إجابة خاطئة";
   }
-  draw();
 }
 
-// ============================================================
-//  HELPERS
-// ============================================================
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function escHtml(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
-
-function formatTime(iso) {
-  if (!iso) return '-';
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
-  } catch(_) { return iso; }
-}
-
-function showMsg(type, text) {
-  const id = type === 'error' ? 'msg-error' : type === 'success' ? 'msg-success' : 'msg-info';
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = text;
-  el.classList.add('show');
-}
-
-function clearMsg() {
-  ['msg-error','msg-success','msg-info'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('show');
-  });
-}
-
-// ============================================================
-//  BOOT
-// ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  const page = getCurrentPage();
-  const id   = getURLParam('id') || new URLSearchParams(window.location.search).get('id');
-
-  // Show correct page
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-
-  if      (page === 'puzzle')      initPuzzlePage(id);
-  else if (page === 'reward')      initRewardPage(id);
-  else if (page === 'leaderboard') initLeaderboardPage();
-});
-
-window.addEventListener('popstate', () => {
-  const page = getCurrentPage();
-  const id   = getURLParam('id') || new URLSearchParams(window.location.search).get('id');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  if      (page === 'puzzle')      initPuzzlePage(id);
-  else if (page === 'reward')      initRewardPage(id);
-  else if (page === 'leaderboard') initLeaderboardPage();
-});
+init();
 </script>
+
 </body>
 </html>
